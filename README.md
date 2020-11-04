@@ -49,7 +49,7 @@ For HIV:<BR/>
 
 You can check the output file in the folder "MT451123_Sim_PE".
 
-The picture below shows an example of a real-word data (SRR114947). <BR/>
+The picture below displays an output example of a real-word data (SRR114947). <BR/>
 
 ![VirStrain Report](https://github.com/liaoherui/VirStrain/blob/main/Output_fmt/Report_Small.png)
 
