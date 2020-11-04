@@ -46,7 +46,7 @@ Use VirStraiin to build your custom database.<BR/><BR/>
 
 ### Output Format
 
-You can check the output file in the folder "MT451123_PE_Test".
+You can check the output file in the folder "MT451123_Sim_PE".
 
 The picture below shows an example of a real-word data (SRR114947). <BR/>
 
