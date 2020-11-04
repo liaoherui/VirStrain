@@ -6,6 +6,45 @@ An RNA virus strain-level identification tool for short reads.
 ### Dependencies:
 * Python >=3.6
 * Perl
-* Required python package: networkx, numpy, pandans, biopython, Plotly==3.10.0
-(If you have conda installed, then you can run `sh install_package.sh` to install all python package.)
+* Required python package: networkx, numpy, pandas, biopython, Plotly==3.10.0
+
+(If you have conda installed, then you can run `sh install_package.sh` to install all packages.)
+
+Make sure these programs have been installed before using VirStrain.
+
+### Install (Only for linux or ubuntu)
+
+####
+`git clone https://github.com/liaoherui/VirStrain.git`<BR/>
+####
+
+Then, you can download the reference database of 3 RNA viruses. Run:<BR/>
+`cd VirStrain`<BR/>
+`sh download.sh`<BR/>
+
+If failed, please email to the author to get the database.
+
+### Usage
+
+Use VirStrain to identify RNA virus strains in short reads.
+
+For SE reads:<BR/>
+  `python VirStrain.py -i Test_Data/MT451123_1.fq -d VirStrain_DB/SCOV2 -o MT451123_SE_Test`<BR/>
+
+For PE reads:<BR/>
+  `python VirStrain.py -i Test_Data/MT451123_1.fq -p Test_Data/MT451123_1.fq -d VirStrain_DB/SCOV2 -o MT451123_SE_Test`<BR/>
+
+When the virus has high mutation rate, like HIV, then you may need to add `-m` parameter.
+
+For HIV:<BR/>
+  SE reads: `python VirStrain.py -i <Read1> -d VirStrain_DB/HIV -o <Output_dir> -m`<BR/>
+  PE reads: `python VirStrain.py -i <Read1> -p <Read2> -d VirStrain_DB/HIV -o <Output_dir> -m`<BR/>
+
+Use VirStraiin to build your custom database.<BR/>
+  `python VirStrain_build.py -i <Inpu_MSA> -d <Database_Dir>`<BR/>
+  Note: The format of input MSA should be same as the format of Mafft (https://mafft.cbrc.jp/alignment/software/).<BR/>
+
+
+
+
 
