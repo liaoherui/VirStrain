@@ -8,7 +8,7 @@ An RNA virus strain-level identification tool for short reads.
 * Perl
 * Required python package: networkx, numpy, pandas, biopython, Plotly==3.10.0
 
-(If you have conda installed, then you can run `sh install_package.sh` to install all required packages.)
+(If you have installed conda, then you can run `sh install_package.sh` to install all required packages automatically.)
 
 Make sure these programs have been installed before using VirStrain.
 
