@@ -1,5 +1,5 @@
 # Use conda to install latest version of plotly to avoid error
-conda install -y -c ployly plotly &&\
+conda install -y -c plotly plotly &&\
 # plotly
 pip install plotly==3.10.0  &&\
 # Networkx
