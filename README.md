@@ -32,7 +32,7 @@ For SE reads:<BR/>
   `python VirStrain.py -i Test_Data/MT451123_1.fq -d VirStrain_DB/SCOV2 -o MT451123_SE_Test`<BR/>
 
 For PE reads:<BR/>
-  `python VirStrain.py -i Test_Data/MT451123_1.fq -p Test_Data/MT451123_1.fq -d VirStrain_DB/SCOV2 -o MT451123_PE_Test`<BR/>
+  `python VirStrain.py -i Test_Data/MT451123_1.fq -p Test_Data/MT451123_2.fq -d VirStrain_DB/SCOV2 -o MT451123_PE_Test`<BR/>
 
 When the virus has high mutation rate, like HIV, then you may need to add `-m` parameter.
 
