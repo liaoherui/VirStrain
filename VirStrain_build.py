@@ -29,7 +29,7 @@ def main():
 	# Step1 - Choose sites
 	os.system('perl bin/aln2cluster-overlap-kmer-withd.pl '+in_msa+' '+str(snum)+' '+str(dashc)+' 0 '+str(cnum)+' 0 > VirStrain_build.column')
 	# Step2 - Extract kmer and generate snp matrix
-	os.system('python bin/S1_extract_kmer.py -i '+in_msa+' -c VirStrain_build_tem.column')
+	os.system('python bin/S1_extract_kmer.py -i '+in_msa+' -c VirStrain_build.column')
 	# Step3 - Divide strains into clusters
 	os.system('python bin/S2_remove_redundant_For_Me.py -i Strain_pos_snp_matrix_consider_all.txt')
 	# Step4 - Hierarchical Clustering
