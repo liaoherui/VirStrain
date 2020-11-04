@@ -16,6 +16,8 @@ Make sure these programs have been installed before using VirStrain.
 
 ####
 `git clone https://github.com/liaoherui/VirStrain.git`<BR/>
+`cd VirStrain`<BR/>
+`chmod 755 bin/jellyfish-linux`<BR/>
 ####
 
 Then, you can download the reference database of 3 RNA viruses. Run:<BR/>
