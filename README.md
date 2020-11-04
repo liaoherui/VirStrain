@@ -32,7 +32,7 @@ For SE reads:<BR/>
   `python VirStrain.py -i Test_Data/MT451123_1.fq -d VirStrain_DB/SCOV2 -o MT451123_SE_Test`<BR/>
 
 For PE reads:<BR/>
-  `python VirStrain.py -i Test_Data/MT451123_1.fq -p Test_Data/MT451123_1.fq -d VirStrain_DB/SCOV2 -o MT451123_SE_Test`<BR/>
+  `python VirStrain.py -i Test_Data/MT451123_1.fq -p Test_Data/MT451123_1.fq -d VirStrain_DB/SCOV2 -o MT451123_PE_Test`<BR/>
 
 When the virus has high mutation rate, like HIV, then you may need to add `-m` parameter.
 
@@ -46,7 +46,11 @@ Use VirStraiin to build your custom database.<BR/><BR/>
 
 ### Output Format
 
+You can check the output file in the folder "MT451123_PE_Test".
 
+The picture below shows an example of a real-word data (SRR114947). <BR/>
+
+![VirStrain Report](https://github.com/liaoherui/VirStrain/blob/main/Output_fmt/Report_Small.png)
 
 
 
