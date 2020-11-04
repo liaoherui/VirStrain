@@ -1,11 +1,11 @@
 # plotly
-pip install plotly==3.10.0
+pip install plotly==3.10.0  &&\
 # Networkx
-conda install networkx
+conda install networkx &&\
 # Biopython
-conda install -c conda-forge biopython
+conda install -c conda-forge biopython &&\
 # Numpy
-conda install numpy
+conda install numpy &&\
 # Pandas
 conda install pandas
 
