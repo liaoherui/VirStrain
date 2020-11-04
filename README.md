@@ -4,7 +4,7 @@ An RNA virus strain-level identification tool for short reads.
 ### Version: V1.0
 ---------------------------------------------------------------------------
 ### Dependencies:
-* Python >=3.6
+* Python >=3.6 (3.9 is not supprted now!)
 * Perl
 * Required python package: networkx, numpy, pandas, biopython, Plotly==3.10.0
 
