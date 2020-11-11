@@ -162,13 +162,25 @@ while True:
 			dscf[s][c]+=int(ele[-1])
 #print(len(dkc))
 #exit()
+dc={}
+if os.path.exists(db_dir+'/head_file.txt'):
+	fp=open(db_dir+'/head_file.txt','r')
+	while True:
+		line=fp.readline().strip()
+		if not line:break
+		ele=line.split('\t')
+		dc[ele[0]]=ele[1]
+
 o=open(out_file,'w+')
 o.write('\t\tStrah_ID\tCls_info\tKmer_Hit_Num\tMap_Rate\tStrain_Depth\tStrain_info\n')
 res=sorted(dss.items(),key=lambda d:d[1],reverse=True)
 #o.write('Round-1\t'+res[0][0]+'\t'+str(res[0][1])+'\n')
 depth_mp=float(res[0][1])/float(dskc[res[0][0]])
 o.write('>>Most possible strains:\n')
-o.write('\t\t'+id2name[res[0][0]]+'\t'+id2cls[res[0][0]]+'\t'+str(res[0][1])+'\t'+str(len(dsvkc[res[0][0]]))+'/'+str(len(dscl[res[0][0]]))+'\t'+str(depth_mp)+'\tNA\n')
+if id2name[res[0][0]] not in dc:
+	o.write('\t\t'+id2name[res[0][0]]+'\t'+id2cls[res[0][0]]+'\t'+str(res[0][1])+'\t'+str(len(dsvkc[res[0][0]]))+'/'+str(len(dscl[res[0][0]]))+'\t'+str(depth_mp)+'\tNA\n')
+else:
+	o.write('\t\t'+id2name[res[0][0]]+'\t'+id2cls[res[0][0]]+'\t'+str(res[0][1])+'\t'+str(len(dsvkc[res[0][0]]))+'/'+str(len(dscl[res[0][0]]))+'\t'+str(depth_mp)+'\t'+dc[id2name[res[0][0]]]+'\n')
 mp_strain=id2name[res[0][0]]
 mp_sid=res[0][0]
 #exit()
@@ -230,7 +242,10 @@ while True:
 	d=c+2
 	cdepth=float(res[0][1])/float(temc_knum[res[0][0]])
 	o.write('\t>>Left_Kmer_Num:'+str(count)+'\n')
-	o.write('\t\t'+str(id2name[res[0][0]])+'\t'+id2cls[res[0][0]]+'\t'+str(res[0][1])+'\t'+str(len(dsvkc[res[0][0]]))+'/'+str(len(dscl[res[0][0]]))+'\t'+str(cdepth)+'\nNA\n')
+	if id2name[res[0][0]] not in dc:
+		o.write('\t\t'+str(id2name[res[0][0]])+'\t'+id2cls[res[0][0]]+'\t'+str(res[0][1])+'\t'+str(len(dsvkc[res[0][0]]))+'/'+str(len(dscl[res[0][0]]))+'\t'+str(cdepth)+'\tNA\n')
+	else:
+		o.write('\t\t'+str(id2name[res[0][0]])+'\t'+id2cls[res[0][0]]+'\t'+str(res[0][1])+'\t'+str(len(dsvkc[res[0][0]]))+'/'+str(len(dscl[res[0][0]]))+'\t'+str(cdepth)+'\t'+dc[id2name[res[0][0]]]+'\n')
 	#o.write('Round-'+str(d)+'\t'+str(res[0][0])+'\t'+str(res[0][1])+'\n')
 	c+=1
 '''

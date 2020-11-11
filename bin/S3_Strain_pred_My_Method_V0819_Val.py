@@ -13,7 +13,7 @@ import numpy as np
 #from sklearn.linear_model import Lasso, LassoCV
 #from scipy.stats import pearsonr
 
-opts,args=getopt.getopt(sys.argv[1:],"i:p:k:m:s:f:c:b:o:")
+opts,args=getopt.getopt(sys.argv[1:],"i:p:k:m:s:f:c:b:d:o:")
 read_1=''	# SE or long reads
 read_2=''	# PE reads - read set 2
 snp_kmr_file='' #kmer -> snp_pos file
@@ -22,6 +22,7 @@ matrix_file='' # Sno-pos matrix file
 cls_file=''
 sub_kmr_file=''
 out_dir=''
+db_dir=''
 
 k=25		# Default k size=25
 #min_depth_rate=0.1
@@ -48,6 +49,8 @@ for opt,arg in opts:
 		cls_file=arg
 	elif opt=='-b':
 		sub_kmr_file=arg
+	elif opt=='-d':
+		db_dir=arg
 	elif opt=='-o':
 		out_dir=arg
 
@@ -561,23 +564,18 @@ if not len(left_freq_arr)==0:
 # All strain cross validation
 
 ### Output part
-'''
-fp=open('../head_file.txt','r')
 dc={}
-while True:
-	line=fp.readline().strip()
-	if not line:break
-	pre=re.split('\|',line)[0].strip()
-	anno=re.split('\|',line)[1].strip()
-	#t=re.split('/',line)
-	if len(t)<3:
-		dc[pre]='NA'
-	else:
-	#country=re.split('/',line)[2]
-	#if re.search('2020',country):
-	#country='NA'
-	dc[pre]=anno
-'''
+if os.path.exists(db_dir+'/head_file.txt'):
+	fp=open(db_dir+'/head_file.txt','r')
+	dc={}
+	while True:
+		line=fp.readline().strip()
+		if not line:break
+		ele=line.split('\t')
+		#pre=re.split('\|',line)[0].strip()
+		#anno=re.split('\|',line)[1].strip()
+		dc[ele[0]]=ele[1]
+
 o=open(out_dir,'w+')
 o.write('\t\tStrain_ID\tCls_info\tSubCls_info\tMap_Score\tValid_Map_Rate\tTotal_Map_Rate\tStrain_Depth\tStrain_info\tUnique_SNP\n')
 o.write('>>Most possible strains:\n')
@@ -671,9 +669,15 @@ for s in mp_strain:
 	#keep=(ds_pos[s]==1)
 	#all_s.append(s)
 	if s in strain_unique:
-		o.write('\t\t'+s+'\t'+s2cls[s]+'\t'+s2sub[s]+'\t'+str(dmap_rate[s])+'\t'+str(ds_num[s])+'\t'+str(ds_num[s])+'\t'+str(ds_avgd[s])+'\t\t\t'+str(strain_unique[s])+'\n')
+		if s not in dc:
+			o.write('\t\t'+s+'\t'+s2cls[s]+'\t'+s2sub[s]+'\t'+str(dmap_rate[s])+'\t'+str(ds_num[s])+'\t'+str(ds_num[s])+'\t'+str(ds_avgd[s])+'\t\t\t'+str(strain_unique[s])+'\n')
+		else:
+			o.write('\t\t'+s+'\t'+s2cls[s]+'\t'+s2sub[s]+'\t'+str(dmap_rate[s])+'\t'+str(ds_num[s])+'\t'+str(ds_num[s])+'\t'+str(ds_avgd[s])+'\t'+dc[s]+'\t'+str(strain_unique[s])+'\n')
 	else:
-		o.write('\t\t'+s+'\t'+s2cls[s]+'\t'+s2sub[s]+'\t'+str(dmap_rate[s])+'\t'+str(ds_num[s])+'\t'+str(ds_num[s])+'\t'+str(ds_avgd[s])+'\t\t\tNA\n')
+		if s not in dc:
+			o.write('\t\t'+s+'\t'+s2cls[s]+'\t'+s2sub[s]+'\t'+str(dmap_rate[s])+'\t'+str(ds_num[s])+'\t'+str(ds_num[s])+'\t'+str(ds_avgd[s])+'\t\t\tNA\n')
+		else:
+			o.write('\t\t'+s+'\t'+s2cls[s]+'\t'+s2sub[s]+'\t'+str(dmap_rate[s])+'\t'+str(ds_num[s])+'\t'+str(ds_num[s])+'\t'+str(ds_avgd[s])+'\t'+dc[s]+'\tNA\n')
 o.write('>>Other possible strains:\n')
 if len(os_arr)>0:
 	#i=1
@@ -689,9 +693,15 @@ if len(os_arr)>0:
 			a=re.split('/',ds_num[n])[-1]
 			vm=str(vmap[s])+'/'+a
 			if n in s2sub:
-				o.write('\t\t'+n+'\t'+s2cls[n]+'\t'+s2sub[n]+'\t'+str(dmap_rate[n])+'\t'+vm+'\t'+ds_num[n]+'\t'+str(ds_avgd[n])+'\t\t\tNot_record\n')
+				if n not in dc:
+					o.write('\t\t'+n+'\t'+s2cls[n]+'\t'+s2sub[n]+'\t'+str(dmap_rate[n])+'\t'+vm+'\t'+ds_num[n]+'\t'+str(ds_avgd[n])+'\t\t\tNot_record\n')
+				else:
+					o.write('\t\t'+n+'\t'+s2cls[n]+'\t'+s2sub[n]+'\t'+str(dmap_rate[n])+'\t'+vm+'\t'+ds_num[n]+'\t'+str(ds_avgd[n])+'\t'+dc[n]+'\tNot_record\n')
 			else:
-				o.write('\t\t'+n+'\t'+s2cls[n]+'\tNot_record\t'+str(dmap_rate[n])+'\t'+vm+'\t'+ds_num[n]+'\t'+str(ds_avgd[n])+'\t\t\tNot_record\n')
+				if n not in dc:
+					o.write('\t\t'+n+'\t'+s2cls[n]+'\tNot_record\t'+str(dmap_rate[n])+'\t'+vm+'\t'+ds_num[n]+'\t'+str(ds_avgd[n])+'\t\t\tNot_record\n')
+				else:
+					o.write('\t\t'+n+'\t'+s2cls[n]+'\tNot_record\t'+str(dmap_rate[n])+'\t'+vm+'\t'+ds_num[n]+'\t'+str(ds_avgd[n])+'\t'+dc[n]+'\tNot_record\n')
 				
 		#outs='\t'.join(os_strain[s])
 		#o.write('\t\t\t'+outs+'\n')
@@ -709,15 +719,28 @@ if not len(final)==0:
 	res=sorted(final.items(),key=lambda d:d[1],reverse=True)
 	for s in res:
 		if s[0] in s2sub:
-			o.write('\t\t'+s[0]+'\t'+s2cls[s[0]]+'\t'+s2sub[s[0]]+'\t'+str(dmap_rate[s[0]])+'\t'+ds_num[s[0]]+'\t'+ds_num[s[0]]+'\tNA\tNA\n')
+			if s[0] not in dc:
+				o.write('\t\t'+s[0]+'\t'+s2cls[s[0]]+'\t'+s2sub[s[0]]+'\t'+str(dmap_rate[s[0]])+'\t'+ds_num[s[0]]+'\t'+ds_num[s[0]]+'\tNA\tNA\n')
+			else:
+				o.write('\t\t'+s[0]+'\t'+s2cls[s[0]]+'\t'+s2sub[s[0]]+'\t'+str(dmap_rate[s[0]])+'\t'+ds_num[s[0]]+'\t'+ds_num[s[0]]+'\t'+dc[s[0]]+'\tNA\n')
 		else:
-			o.write('\t\t'+s[0]+'\t'+s2cls[s[0]]+'\tNot_record\t'+str(dmap_rate[s[0]])+'\t'+ds_num[s[0]]+'\t'+ds_num[s[0]]+'\tNA\tNA\n')
+			if s[0] not in dc:
+				o.write('\t\t'+s[0]+'\t'+s2cls[s[0]]+'\tNot_record\t'+str(dmap_rate[s[0]])+'\t'+ds_num[s[0]]+'\t'+ds_num[s[0]]+'\tNA\tNA\n')
+			else:
+				o.write('\t\t'+s[0]+'\t'+s2cls[s[0]]+'\tNot_record\t'+str(dmap_rate[s[0]])+'\t'+ds_num[s[0]]+'\t'+ds_num[s[0]]+'\t'+dc[s[0]]+'\tNA\n')
+
 o.write('>>Top10_Score_Strains:\n')
 for t in top10_score_s:
 	if t[0] in s2sub:
-		o.write('\t\t'+t[0]+'\t'+s2cls[t[0]]+'\t'+s2sub[t[0]]+'\t'+str(t[1])+'\t'+ds_num[t[0]]+'\t'+ds_num[t[0]]+'\tNA\tNA\n')
+		if t[0] not in dc:
+			o.write('\t\t'+t[0]+'\t'+s2cls[t[0]]+'\t'+s2sub[t[0]]+'\t'+str(t[1])+'\t'+ds_num[t[0]]+'\t'+ds_num[t[0]]+'\tNA\tNA\n')
+		else:
+			o.write('\t\t'+t[0]+'\t'+s2cls[t[0]]+'\t'+s2sub[t[0]]+'\t'+str(t[1])+'\t'+ds_num[t[0]]+'\t'+ds_num[t[0]]+'\t'+dc[t[0]]+'\tNA\n')
 	else:
-		o.write('\t\t'+t[0]+'\t'+s2cls[t[0]]+'\tNot_record\t'+str(t[1])+'\t'+ds_num[t[0]]+'\t'+ds_num[t[0]]+'\tNA\tNA\n')
+		if t[0] not in dc:
+			o.write('\t\t'+t[0]+'\t'+s2cls[t[0]]+'\tNot_record\t'+str(t[1])+'\t'+ds_num[t[0]]+'\t'+ds_num[t[0]]+'\tNA\tNA\n')
+		else:
+			o.write('\t\t'+t[0]+'\t'+s2cls[t[0]]+'\tNot_record\t'+str(t[1])+'\t'+ds_num[t[0]]+'\t'+ds_num[t[0]]+'\t'+dc[t[0]]+'\tNA\n')
 ## Remove tem file 
 os.system('rm Tem_Vs* Tem_VS*')
 ## From this line, we will generate strain-level analysis report
