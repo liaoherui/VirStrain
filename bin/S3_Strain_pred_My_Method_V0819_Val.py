@@ -744,7 +744,7 @@ for t in top10_score_s:
 ## Remove tem file 
 os.system('rm Tem_Vs* Tem_VS*')
 ## From this line, we will generate strain-level analysis report
-print('Txt report is done. Now will generate pdf report!')
+print('Txt report is done. Now will generate HTML report!')
 
 vs_so=vs_so[:5]
 for s in ds_freq:
