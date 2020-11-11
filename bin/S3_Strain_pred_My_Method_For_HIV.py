@@ -255,7 +255,7 @@ for r in res[:10]:
 		o.write(r[0]+'\t'+str(r[1])+'\n')
 '''
 os.system('rm Tem_VS.jf Tem_Vs.fa')
-print('Text report is done. Now will generate pdf report!')
+print('Text report is done. Now will generate HTML report!')
 ov1=open('Mps_ps_depth.csv','w+')
 ov2=open('Ops_ps_depth.csv','w+')
 ov1.write('ID,Column_ID,'+mp_strain+'_Freq,'+mp_strain+'_LNum\n')
