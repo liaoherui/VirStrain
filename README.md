@@ -12,7 +12,7 @@ An RNA virus strain-level identification tool for short reads.
 
 Make sure these programs have been installed before using VirStrain.
 
-## Install (Only for linux or ubuntu)
+## Install (Linux or ubuntu only)
 
 ####
 `git clone https://github.com/liaoherui/VirStrain.git`<BR/>
