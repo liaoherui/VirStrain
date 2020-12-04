@@ -659,8 +659,11 @@ if not len(candidate_cls)==0:
 			s2sub[s]='NA'
 		else:
 			res=sorted(cls_sub[s2cls[s]].items(),key=lambda d:d[1],reverse=True)
-			if res[0][1]==res[1][1]:
-				s2sub[s]='NA'
+			if len(res)>1:
+				if res[0][1]==res[1][1]:
+					s2sub[s]='NA'
+				else:
+					s2sub[s]=res[0][0]
 			else:
 				s2sub[s]=res[0][0]
 
@@ -744,7 +747,7 @@ for t in top10_score_s:
 ## Remove tem file 
 os.system('rm Tem_Vs* Tem_VS*')
 ## From this line, we will generate strain-level analysis report
-print('Txt report is done. Now will generate HTML report!')
+print('Txt report is done. Now will generate pdf report!')
 
 vs_so=vs_so[:5]
 for s in ds_freq:
