@@ -366,7 +366,7 @@ if sn>1:
 	
 snp_arr=np.array(snp_arr)
 pos_sum=snp_arr.sum(axis=0)
-pos_sum[pos_sum>1]=0
+#pos_sum[pos_sum>1]=0
 i=0
 
 strain_unique={}
@@ -374,14 +374,14 @@ strain_unique_count={}
 for p in pos_sum:
 	column=pos_snp[i]
 	#i+=1
-	if p==1:
+	if p>=1:
 		if pos_freq_map[column]<=min_depth_absolute:
 			i+=1
 			continue
 		i2=0
 		window=snp_arr[:,i]
 		for w in window:
-			if w==1:
+			if w>=1:
 				strain=top_map_strain[i2]
 				if strain not in strain_unique:
 					strain_unique[strain]={column:pos_freq_map[column]}
