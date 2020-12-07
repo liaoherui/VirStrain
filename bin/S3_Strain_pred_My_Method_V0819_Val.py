@@ -814,10 +814,6 @@ for c in carr:
 		elif check==1:
 			if check1==1:
 				ov1.write(',0,'+str(dscl[s][c]))	
-			if check2==1:
-				ov2.write(','+str(dscf[s][c])+',0')	
-		elif check==2:
-			ov2.write(',0,0')	
 	ov1.write('\n')
 	i+=1
 	
