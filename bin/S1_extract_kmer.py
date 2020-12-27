@@ -141,7 +141,7 @@ for c in column_arr:
 				rseq+=r.upper()
 		lseq=lseq[::-1]
 		kmr=lseq+base+rseq
-		if len(kmr) <25:
+		if len(kmr) <k:
 			if len(lseq)<(k-1)/2:
 				rseq=''
 				rl=k-1-len(lseq)
