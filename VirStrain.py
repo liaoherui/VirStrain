@@ -32,17 +32,19 @@ def main():
 			os.system('python bin/S3_Strain_pred_My_Method_For_HIV.py -i '+in_read1+' -s '+db_dir+'/Pos-snp-kmer-all.txt  -f '+db_dir+'/Pos-snp-kmer-all.fa -c '+db_dir+'/Remove_redundant_matrix_MM_Call.clstr -d '+db_dir+'/ID2Name.txt  -b '+db_dir+' -o VirStrain_report.txt')
 		else:
 			os.system('python bin/S3_Strain_pred_My_Method_For_HIV.py -i '+in_read1+' -p '+in_read2+' -s '+db_dir+'/Pos-snp-kmer-all.txt  -f '+db_dir+'/Pos-snp-kmer-all.fa -c '+db_dir+'/Remove_redundant_matrix_MM_Call.clstr -d '+db_dir+'/ID2Name.txt  -b '+db_dir+' -o VirStrain_report.txt')
-		os.system('python bin/S4_Plot_strain_cov.py')
-		os.system('mv VirStrain_report.txt VirStrain_report.html Mps_ps_depth.csv Ops_ps_depth.csv '+out_dir)
-		exit()
+		if os.path.exists('VirStrain_report.txt'):
+			os.system('python bin/S4_Plot_strain_cov.py')
+			os.system('mv VirStrain_report.txt VirStrain_report.html Mps_ps_depth.csv Ops_ps_depth.csv '+out_dir)
+			exit()
 	# Start to identify strains
 	if not in_read2: # SE reads
 		os.system('python bin/S3_Strain_pred_My_Method_V0819_Val.py -i '+in_read1+' -s '+db_dir+'/Pos-snp-kmer-all.txt -m '+db_dir+'/Strain_pos_snp_matrix_not_redundant_MM_Call.txt -f '+db_dir+'/Pos-snp-kmer-all.fa -c '+db_dir+'/Strain_cls_info.txt -b '+db_dir+'/SubCls_kmer.txt -d '+db_dir+' -o VirStrain_report.txt')
 	else: # PE reads
 		os.system('python bin/S3_Strain_pred_My_Method_V0819_Val.py -i '+in_read1+' -p '+in_read2+' -s '+db_dir+'/Pos-snp-kmer-all.txt -m '+db_dir+'/Strain_pos_snp_matrix_not_redundant_MM_Call.txt -f '+db_dir+'/Pos-snp-kmer-all.fa -c '+db_dir+'/Strain_cls_info.txt -b '+db_dir+'/SubCls_kmer.txt -d '+db_dir+' -o VirStrain_report.txt')
 	# Plot Html Page
-	os.system('python bin/S4_Plot_strain_cov.py')	
-	os.system('mv VirStrain_report.txt VirStrain_report.html Mps_ps_depth.csv Ops_ps_depth.csv '+out_dir)
+	if os.path.exists('VirStrain_report.txt'):
+		os.system('python bin/S4_Plot_strain_cov.py')	
+		os.system('mv VirStrain_report.txt VirStrain_report.html Mps_ps_depth.csv Ops_ps_depth.csv '+out_dir)
 
 
 if __name__=='__main__':
