@@ -132,6 +132,9 @@ freq_arr=np.array(freq_arr)
 ### Check avg depth from the pos-snp frequency array
 keep=(freq_arr!=0)
 check_arr=freq_arr[keep]
+if len(check_arr)==0:
+	print('No kmers matched! No virus strain can be detected!')
+	exit()
 min_depth,max_depth=np.percentile(check_arr,[min_depth_percentile,max_depth_percentile])
 #print(min_depth)
 keep=np.logical_and.reduce((check_arr>=min_depth,check_arr<=max_depth))
