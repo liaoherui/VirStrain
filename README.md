@@ -57,5 +57,13 @@ The picture below displays an output example of a simulated data (Truth: MT45112
 
 ![VirStrain Report](https://github.com/liaoherui/VirStrain/blob/main/Output_fmt/report_simulate.png)
 
+Explaination about the columns in the output of VirStrain:
+
+Column_name    |	Description	
+------------ | ------------- 
+Strain_ID |	The NCBI accession number of identified strain
+Cls_info | The cluster information of identified strain, eg: Cluster2830_2 -> belong Cluster2830, size=2
+
+
 
 
