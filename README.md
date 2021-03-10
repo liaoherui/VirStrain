@@ -35,7 +35,7 @@ Run:<BR/>
 -> Method-3:<BR/>
 If you have installed git lfs, then you can simply run: <BR/>
 `git lfs clone https://github.com/liaoherui/VirStrain.git`<BR/>
-Then the database will be cloned with the repository.
+Then the database will be cloned with the repository.<BR/><BR/>
 If all failed, please email to the author to get the database.
 
 ## Usage
