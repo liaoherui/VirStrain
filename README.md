@@ -21,18 +21,18 @@ Make sure these programs have been installed before using VirStrain.
 ####
 
 Then, you can download the reference database of 3 RNA viruses. 
-There are three ways for you to download the reference database.
-Method-1:<BR/>
+There are three ways for you to download the reference database.<BR/><BR/>
+-> Method-1:<BR/>
 Run:<BR/>
 `cd VirStrain`<BR/>
 `sh download.sh`<BR/>
-Method-2:<BR/>
+-> Method-2:<BR/>
 Run:<BR/>
 `cd VirStrain`<BR/>
 `wget https://github.com/liaoherui/VirStrain/raw/main/VirStrain_DB.tar.gz`<BR/>
 `tar -zxvf VirStrain_DB.tar.gz`<BR/>
 `rm VirStrain_DB.tar.gz` <BR/>
-Method-3:<BR/>
+-> Method-3:<BR/>
 If you have installed git lfs, then you can simply run: <BR/>
 `git lfs clone https://github.com/liaoherui/VirStrain.git`<BR/>
 Then the database will be cloned with the repository.
