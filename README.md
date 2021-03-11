@@ -38,6 +38,8 @@ If you have installed git lfs, then you can simply run: <BR/>
 Then the database will be cloned with the repository.<BR/><BR/>
 If all failed, please email to the author to get the database.
 
+You can also build the VirStrain database with your own genomes, the construction mannual is written in Usage section.
+
 ## Usage
 
 ### Use VirStrain to identify RNA virus strains in short reads.
