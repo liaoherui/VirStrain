@@ -1,5 +1,8 @@
 # VirStrain
 An RNA virus strain-level identification tool for short reads.
+
+
+
 ### E-mail: heruiliao2-c@my.cityu.edu.hk
 ### Version: V1.0
 ---------------------------------------------------------------------------
@@ -41,6 +44,8 @@ If all failed, please email to the author to get the database.
 You can also build the VirStrain database with your own genomes, the construction mannual is written in Usage section.
 
 ## Usage
+
+(Note: The initial idea of development of VirStrain is "Simpler is better". We do not want to burden users due to complicated usage of VirStrain. So the default parameters (some are inside the program) are simple but have good performance in our test, however, more useful parameters will be added for users who need them.)
 
 ### Use VirStrain to identify RNA virus strains in short reads.
 
