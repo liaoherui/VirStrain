@@ -67,7 +67,7 @@ For HIV:<BR/>
 ### Full command-line options
 (Note: The initial idea of development of VirStrain is "Simpler is better". We do not want to burden users due to complicated usage of VirStrain. So the default parameters (some are inside the program) are simple but have good performance in our test, however, more useful parameters will be added for users who need them.)
 
-Identification - VirStrain.py
+Identification - VirStrain.py (Default k-mer size: 25)
 ```
 VirStrain - An RNA virus strain-level identification tool for short reads.
 
@@ -84,7 +84,7 @@ optional arguments:
     -c, --site_filter_cutoff      The cutoff of filtering one site when calculate the Vscore. (Default: 0.05)
     -m, --high_mutation_virus     If the virus has high mutation rate (like HIV), use this option. (Default: off)
 ```
-Build database - VirStrain_build.py
+Build database - VirStrain_build.py (Default k-mer size: 25)
 ```
 VirStrain - An RNA virus strain-level identification tool for short reads.
 
