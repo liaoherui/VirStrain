@@ -109,6 +109,14 @@ The picture below displays an output example of a simulated data (Truth: MT45112
 
 ![VirStrain Report](https://github.com/liaoherui/VirStrain/blob/main/Output_fmt/report_simulate.png)
 
+Explaination about the four heads in the output of VirStrain
+Head    |	Description	
+------------ | ------------- 
+Most Possible strains | The most possible strain in the sequencing data detected by VirStrain. (The strains with highest Vscore in the first iteraition.)
+Other Possible strains | The other possible strain in the sequencing data detected by VirStrain. (The strains with highest Vscore in the later iteraition, 10 mutation number can be a strong evidence for other possible strains according to our experiment result.)
+Highest Map Strains | The strain with maximum "Covered SNV site/Total SNV site" in the first iteration. For user's reference.
+Top 10 Score Strains | The top10 strain sorting by Vscore in the first iteration. For user's reference, and also could be useful information to detect those low abundance strains which are highly similar to the high abundance strain (Eg, only one mutation number).
+
 Explaination about the columns in the output of VirStrain:
 
 Column_name    |	Description	
