@@ -28,17 +28,17 @@ There are three ways for you to download the reference database.<BR/><BR/>
 -> Method-1:<BR/>
 Run:<BR/>
 `cd VirStrain`<BR/>
-`sh download.sh`<BR/>
+`sh download.sh`<BR/> <BR/>
 -> Method-2:<BR/>
 Run:<BR/>
 `cd VirStrain`<BR/>
 `wget https://github.com/liaoherui/VirStrain/raw/main/VirStrain_DB.tar.gz`<BR/>
 `tar -zxvf VirStrain_DB.tar.gz`<BR/>
-`rm VirStrain_DB.tar.gz` <BR/>
+`rm VirStrain_DB.tar.gz` <BR/> <BR/>
 -> Method-3:<BR/>
 If you have installed git lfs, then you can simply run: <BR/>
 `git lfs clone https://github.com/liaoherui/VirStrain.git`<BR/>
-Then the database will be cloned with the repository. Then, run: <BR/><BR/>
+Then the database will be cloned with the repository. Then, run: <BR/>
 `cd VirStrain`<BR/>
 `tar -zxvf VirStrain_DB.tar.gz`<BR/>
 `rm VirStrain_DB.tar.gz` <BR/>
