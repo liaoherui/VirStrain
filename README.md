@@ -113,7 +113,7 @@ The picture below displays an output example of a simulated data (Truth: MT45112
 
 ![VirStrain Report](https://github.com/liaoherui/VirStrain/blob/main/Output_fmt/report_simulate.png)
 
-Explaination about the four heads in the output of VirStrain
+Explaination about the four headers in the output of VirStrain
 Head    |	Description	
 ------------ | ------------- 
 Most Possible strains | The most possible strain in the sequencing data detected by VirStrain.<BR/>(The strains with highest Vscore in the first iteraition.)
