@@ -24,7 +24,7 @@ Make sure these programs have been installed before using VirStrain.
 ####
 
 Then, you can download the reference database of 3 RNA viruses. 
-There are three ways for you to download the reference database.<BR/><BR/>
+There are three ways to download the reference database.<BR/><BR/>
 -> Method-1:<BR/>
 Run:<BR/>
 `cd VirStrain`<BR/>
