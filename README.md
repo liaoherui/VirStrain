@@ -36,7 +36,7 @@ Run:<BR/>
 `tar -zxvf VirStrain_DB.tar.gz`<BR/>
 `rm VirStrain_DB.tar.gz` <BR/> <BR/>
 -> Method-3:<BR/>
-If you have installed git lfs, then you can simply run: <BR/>
+If you have installed `git lfs`, then you can simply run: <BR/>
 `git lfs clone https://github.com/liaoherui/VirStrain.git`<BR/>
 Then the database will be cloned with the repository. Then, run: <BR/>
 `cd VirStrain`<BR/>
