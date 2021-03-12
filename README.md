@@ -107,7 +107,7 @@ optional arguments:
 
 The output of VirStrain contains two files. The first is a report file in text format. This file contains all identified strains and their depth and site coverage, etc. The other file is an interactive HTML page to display the depth and uniqueness of sites. 
 
-You can check the output file in the folder "MT451123_Sim_PE".
+You can check the output file in the folder "MT451123_Sim_PE" in this repository.
 
 The picture below displays an output example of a simulated data (Truth: MT451123.1). <BR/>
 
