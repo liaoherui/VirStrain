@@ -116,10 +116,12 @@ The picture below displays an output example of a simulated data (Truth: MT45112
 Explaination about the four headers in the output of VirStrain
 Header    |	Description	
 ------------ | ------------- 
-**Most Possible strains*** | The most possible strain in the sequencing data detected by VirStrain.<BR/>(The strains with highest Vscore in the first iteraition.)
+**Most Possible strain*** | The most possible strain in the sequencing data detected by VirStrain.<BR/>(The strains with highest Vscore in the first iteraition.)
 **Other Possible strains*** | The other possible strain in the sequencing data detected by VirStrain.<BR/>(The strains with highest Vscore in the later iteraition, 10 mutation number can be a strong evidence for other possible strains according to our experiment result.)
 Highest Map Strains | The strain with maximum "Covered SNV site/Total SNV site" in the first iteration. For user's reference.
 Top 10 Score Strains | The top10 strain sorted by Vscore in the first iteration. <BR/>For user's reference, and also could be useful information to detect those low abundance strains which are highly similar to the high abundance strain (Eg, only one mutation number).
+
+（Note: the header with **\*** means the content below includes the main identification result.）
 
 Explaination about the columns in the output of VirStrain:
 
