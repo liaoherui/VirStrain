@@ -114,7 +114,7 @@ The picture below displays an output example of a simulated data (Truth: MT45112
 ![VirStrain Report](https://github.com/liaoherui/VirStrain/blob/main/Output_fmt/report_simulate.png)
 
 Explaination about the four headers in the output of VirStrain
-Head    |	Description	
+Header    |	Description	
 ------------ | ------------- 
 Most Possible strains | The most possible strain in the sequencing data detected by VirStrain.<BR/>(The strains with highest Vscore in the first iteraition.)
 Other Possible strains | The other possible strain in the sequencing data detected by VirStrain.<BR/>(The strains with highest Vscore in the later iteraition, 10 mutation number can be a strong evidence for other possible strains according to our experiment result.)
