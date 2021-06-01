@@ -100,6 +100,7 @@ required arguments:
 optional arguments:
      -d, --database_dir            The output directory of constructed database. (Default: ./VirStrain_DB)
      -c, --dash_cutoff             The cutoff of dash in each column of MSA. (Default: 0)
+     -s, --sites_cutoff            The cutoff of sites number for manual-covering function. (eg. 1 means all useful sites will be use and 0.8 means 80% useful sites will be used)
 
 ```
 
