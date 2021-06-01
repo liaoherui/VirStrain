@@ -7,7 +7,7 @@ __author__="Liao Herui"
 usage="VirStrain - An RNA virus strain-level identification tool for short reads."
 
 def main():
-	parser=argparse.ArgumentParser(prog='VirStrain_build.py',description=usage)
+	parser=argparse.ArgumentParser(prog='VirStrain.py',description=usage)
 	parser.add_argument('-i','--input_reads',dest='input_reads',type=str,required=True,help="Input fastq data --- Required")
 	parser.add_argument('-p','--input_reads2',dest='input_reads2',type=str,help="Input fastq data for PE reads.")
 	parser.add_argument('-d','--database_dir',dest='db_dir',type=str,required=True,help='Database dir --- Required')
