@@ -4,7 +4,7 @@ An RNA virus strain-level identification tool for short reads.
 
 
 ### E-mail: heruiliao2-c@my.cityu.edu.hk
-### Version: V1.0
+### Version: V1.1 
 ---------------------------------------------------------------------------
 ### Dependencies:
 * Python >=3.6 (3.6 is recommanded and 3.9 is not supprted now!)
