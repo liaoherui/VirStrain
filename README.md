@@ -1,4 +1,4 @@
-# VirStrain
+# VirStrain   <img src="logo.png" width="250" title="VirStrain">
 An RNA virus strain-level identification tool for short reads.
 
 
