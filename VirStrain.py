@@ -24,6 +24,8 @@ def main():
 	hm=args.hm_virus
 	if not sfc:
 		sfc=0.05
+	if not out_dir:
+		out_dir='VirStrain_Out'
 	if not os.path.exists(out_dir):
 		os.makedirs(out_dir)
 	# whether this is the virus with high mutation rate, like HIV
