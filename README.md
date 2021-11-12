@@ -63,6 +63,12 @@ If all failed, please email to the author to get the database.
 You can also build the VirStrain database with your own genomes, the mannual is written in Usage section.
 
 ## Usage
+It should be noted if you install VirStrain using bioconda, you should replace the commands. (see below)
+
+Command (Not bioconda)    |	Command (bioconda)
+------------ | ------------- 
+python VirStrain.py  | virstrain 
+python VirStrain_build.py | virstrain_build
 
 ### Use VirStrain to identify RNA virus strains in short reads.
 
