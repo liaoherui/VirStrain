@@ -5,7 +5,7 @@ An RNA virus strain-level identification tool for short reads.
 
 
 ### E-mail: heruiliao2-c@my.cityu.edu.hk
-### Version: V1.1 
+### Version: V1.10
 ---------------------------------------------------------------------------
 ### Dependencies:
 * Python >=3.6 (3.6 is recommanded and 3.9 is not supprted now!)
@@ -23,12 +23,17 @@ Once you have bioconda environment installed, install package virstrain:
 
 	conda install -c bioconda virstrain
 
-It should be noted that some commands have been replaced if you install VirStrain using bioconda. (See below)
+The second way to install VirStrain, is to use [pip](https://pypi.org/project/virstrain/):
 
-Command (Not bioconda)    |	Command (bioconda)
+	pip install virstrain==1.10
+
+It should be noted that some commands have been replaced if you install VirStrain using bioconda/pip. (See below)
+
+Command (Not bioconda)    |	Command (bioconda/pip)
 ------------ | ------------- 
 python VirStrain.py -h | virstrain -h
 python VirStrain_build.py -h | virstrain_build -h
+
 
 Or you can install VirStrain mannually.
 ####
@@ -63,9 +68,9 @@ If all failed, please email to the author to get the database.
 You can also build the VirStrain database with your own genomes, the mannual is written in Usage section.
 
 ## Usage
-It should be noted if you install VirStrain using bioconda, you should replace the commands. (see below)
+It should be noted if you install VirStrain using bioconda/pip, you should replace the commands. (see below)
 
-Command (Not bioconda)    |	Command (bioconda)
+Command (Not bioconda)    |	Command (bioconda/pip)
 ------------ | ------------- 
 python VirStrain.py  | virstrain 
 python VirStrain_build.py | virstrain_build
