@@ -14,10 +14,23 @@ An RNA virus strain-level identification tool for short reads.
 
 (If you have installed conda, then you can run `sh install_package.sh` to install all required packages automatically.)
 
-Make sure these programs have been installed before using VirStrain.
+Make sure these programs have been installed before using VirStrain. (However, if you use bioconda to install VirStrain, ignore this.)
 
 ## Install (Linux or ubuntu only)
 
+The first way to install VirStrain, is to use [bioconda](https://bioconda.github.io/).
+Once you have bioconda environment installed, install package virstrain:
+
+	conda install -c bioconda virstrain
+
+It should be noted that some commands have been replaced if you install VirStrain using bioconda. (See below)
+
+Command (Not bioconda)    |	Command (bioconda)
+------------ | ------------- 
+python VirStrain.py -h | virstrain -h
+python VirStrain_build.py -h | virstrain_build -h
+
+Or you can install VirStrain mannually.
 ####
 `git clone https://github.com/liaoherui/VirStrain.git`<BR/>
 `cd VirStrain`<BR/>
