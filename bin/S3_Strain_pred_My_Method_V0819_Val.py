@@ -123,7 +123,8 @@ for p in pos_snp:
 		freq_arr.append(dpsc[p])
 
 freq_arr=np.array(freq_arr)
-#print(freq_arr[1397])
+#print(freq_arr)
+#exit()
 
 #freq_arr[freq_arr<=min_depth_absolute]=0
 #keep=(freq_arr!=0)
@@ -304,15 +305,22 @@ while True:
 	for r in ds_pos:
 		if r in top_map_strain:continue
 		tt=pre_ds_pos[r]
+		if np.sum(tt)==0:continue
+		#print(tt,pre_wf_arr)
+		#exit()
 		nt=tt*pre_wf_arr
 		#mc=len(nt[nt>0])
 		mr=np.sum(nt)
 		smr[r]=mr
 	res=sorted(smr.items(),key=lambda d:d[1],reverse=True)
+	#print(res)
+	#exit()
 	ts=[]
 	for r in res:
 		if r[1]==res[0][1]:
 			ts.append(r[0])
+	#print(ts)
+	if len(ts)==0:break
 	if len(ts)>1:
 		rmr={}
 		for s in ts:
@@ -322,6 +330,7 @@ while True:
 		strain_num[res2[0][0]]=''
 	else:
 		strain_num[ts[0]]=''
+	#exit()
 	#strain_num[res[0][0]]=''
 	vm1=len(pre_freq_arr)
 	pre_pa=pre_ds_pos[ts[0]]*(-1)
@@ -385,6 +394,7 @@ for p in pos_sum:
 		window=snp_arr[:,i]
 		for w in window:
 			if w>=1:
+				if i2+1>len(top_map_strain):continue
 				strain=top_map_strain[i2]
 				if strain not in strain_unique:
 					strain_unique[strain]={column:pos_freq_map[column]}
