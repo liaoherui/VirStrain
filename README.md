@@ -43,7 +43,7 @@ Or you can install VirStrain mannually.
 `rm VirStrain_DB.tar.gz`<BR/>
 ####
 
-Then, you can download the reference database of 3 RNA viruses. 
+Then, you can download the reference database of 3 RNA viruses used in the paper. 
 There are three ways to download the reference database.<BR/><BR/>
 -> Method-1:<BR/>
 Run:<BR/>
