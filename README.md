@@ -29,7 +29,7 @@ The second way to install VirStrain, is to use [pip](https://pypi.org/project/vi
 
 It should be noted that some commands have been replaced if you install VirStrain using bioconda/pip. (See below)
 
-Command (Not bioconda)    |	Command (bioconda/pip)
+Command (Not bioconda/pip)    |	Command (bioconda/pip)
 ------------ | ------------- 
 python VirStrain.py -h | virstrain -h
 python VirStrain_build.py -h | virstrain_build -h
@@ -70,7 +70,7 @@ You can also build the VirStrain database with your own genomes, the mannual is 
 ## Usage
 It should be noted if you install VirStrain using bioconda/pip, you should replace the commands. (see below)
 
-Command (Not bioconda)    |	Command (bioconda/pip)
+Command (Not bioconda/pip)    |	Command (bioconda/pip)
 ------------ | ------------- 
 python VirStrain.py  | virstrain 
 python VirStrain_build.py | virstrain_build
