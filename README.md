@@ -1,3 +1,4 @@
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/virstrain/README.html)
 # VirStrain   <img src="logo.png" width="250" title="VirStrain">
 An RNA virus strain-level identification tool for short reads.
 
