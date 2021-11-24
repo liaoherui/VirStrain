@@ -65,7 +65,7 @@ Then the database will be cloned with the repository. Then, run: <BR/>
 
 If all failed, please email to the author to get the database.
 
-Update - 2021 - Nov:
+Update - 2021 - Nov:  <BR/>
 The databases of two DNA viruses (HBV and HCMV) used in the paper can be downloaded now! <BR/>
 `sh download_dna.sh`<BR/>
 Besides, a larger database with more SARS-CoV-2 strains (see Supplementary Section 2.1 in the paper) can also be downloaded now. <BR/>
