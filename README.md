@@ -92,9 +92,11 @@ For HIV:<BR/>
 ### Use VirStrain to build your own custom database.<BR/>
   `python VirStrain_build.py -i <Input_MSA> -d <Database_Dir>`<BR/>
   
-  For small-scale strains (<100), you can use manual-covering function to cover more useful sites.
+  For small-scale strains (<100) or viruses with large genome sizes (like HCMV), you can use manual-covering function to cover more useful sites.
   
   `python VirStrain_build.py -i <Input_MSA> -d <Database_Dir> -s 1`<BR/>
+  
+  For example, in our experiment, we used "-s 0.4" for 328 HCMV strains.
   
   Besides, if you only want to use SNV sites from "x" to "y" (eg. x=500 to y=1000), then you can add the parameter `-r`.
   
