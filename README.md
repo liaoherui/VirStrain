@@ -94,7 +94,7 @@ For HIV:<BR/>
   
   For small-scale strains (<100) or viruses with large genome sizes (like HCMV), you can use manual-covering function to cover more useful sites.
   
-  `python VirStrain_build.py -i <Input_MSA> -d <Database_Dir> -s 1`<BR/>
+  `python VirStrain_build.py -i <Input_MSA> -d <Database_Dir> -s 0.4`<BR/>
   
   For example, in our experiment, we used "-s 0.4" for 328 HCMV strains.
   
