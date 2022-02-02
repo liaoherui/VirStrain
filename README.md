@@ -182,4 +182,11 @@ Strain_info | The metadata of identified strains, such as region information and
 SNV_freq | The SNV frequency of all sites.
 
 
+### References:
+
+how to cite this tool:
+```
+Liao, H., Cai, D. & Sun, Y. VirStrain: a strain identification tool for RNA viruses. Genome Biol 23, 38 (2022). https://doi.org/10.1186/s13059-022-02609-x
+```
+
 
