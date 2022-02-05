@@ -2,7 +2,7 @@ import re
 import os
 import getopt
 import sys
-import subprocess,signal
+import subprocess
 #from collections import Counter
 #from Bio.Seq import Seq
 #from Bio.Alphabet import IUPAC
