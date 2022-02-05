@@ -6,6 +6,9 @@ An RNA virus strain-level identification tool for short reads.
 
 ### E-mail: heruiliao2-c@my.cityu.edu.hk
 ### Version: V1.11
+#### *__[Update - 2022 - 02 - 05]__* :  <BR/>
+ 
+* *V1.11: VirStrain is able to take gzipped FASTQs as input now! <BR/>*
 ---------------------------------------------------------------------------
 ### Dependencies:
 * Python >=3.6 (3.7.3 is recommanded and 3.9 is not supprted now!)
