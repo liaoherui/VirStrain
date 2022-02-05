@@ -2,6 +2,7 @@ import re
 import os
 import getopt
 import sys
+import subprocess,signal
 #from collections import Counter
 #from Bio.Seq import Seq
 #from Bio.Alphabet import IUPAC
@@ -93,14 +94,26 @@ pos_snp=re.split('\t',fl) # Head line arr
 
 # Run jellyfish to get kmer counting result
 if read_2=='':
-	cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS.jf '+read_1
+	if re.split('\.',read_1)[-1]=='gz':
+		cmd1='zcat '+read_1+' | '+file_dir+'/jellyfish-linux count /dev/fd/0 -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS.jf '
+	else:
+		cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS.jf '+read_1
 	cmd2=file_dir+'/jellyfish-linux dump -c Tem_VS.jf > Tem_Vs.fa'
-	os.system(cmd1)
+	if re.split('\.',read_1)[-1]=='gz':
+		subprocess.check_output(cmd1,shell=True)
+	else:
+		os.system(cmd1)
 	os.system(cmd2)
 else:
-	cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS.jf '+read_1+' '+read_2
+	if re.split('\.',read_1)[-1]=='gz' or re.split('\.',read_2)[-1]=='gz':
+		cmd1='zcat '+read_1+' '+read_2+' | '+file_dir+'/jellyfish-linux count /dev/fd/0 -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS.jf '
+	else:
+		cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS.jf '+read_1+' '+read_2
 	cmd2=file_dir+'/jellyfish-linux dump -c Tem_VS.jf > Tem_Vs.fa'
-	os.system(cmd1)
+	if re.split('\.',read_1)[-1]=='gz' or re.split('\.',read_2)[-1]=='gz':
+		subprocess.check_output(cmd1,shell=True)
+	else:
+		os.system(cmd1)
 	os.system(cmd2)
 	
 
@@ -651,11 +664,20 @@ if not len(candidate_cls)==0:
 		co+=1
 	ok.close()
 	if read_2=='':
-		cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if Tem_Vs2Sub.fa -o Tem_VS2.jf '+read_1
+		if re.split('\.',read_1)[-1]=='gz':
+			cmd1='zcat '+read_1+' | '+file_dir+'/jellyfish-linux count /dev/fd/0 -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS.jf'
+		else:
+			cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if Tem_Vs2Sub.fa -o Tem_VS2.jf '+read_1
 	else:
-		cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if Tem_Vs2Sub.fa -o Tem_VS2.jf '+read_1+' '+read_2
+		if re.split('\.',read_1)[-1]=='gz' or re.split('\.',read_2)[-1]=='gz':
+			cmd1='zcat '+read_1+' '+read_2+' | '+file_dir+'/jellyfish-linux count /dev/fd/0 -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS.jf'
+		else:
+			cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if Tem_Vs2Sub.fa -o Tem_VS2.jf '+read_1+' '+read_2
 	cmd2=file_dir+'/jellyfish-linux dump -c Tem_VS2.jf > Tem_Vs2.fa'
-	os.system(cmd1)
+	if re.split('\.',read_1)[-1]=='gz':
+		subprocess.check_output(cmd1,shell=True)
+	else:
+		os.system(cmd1)
 	os.system(cmd2)
 	ft2=open('Tem_Vs2.fa','r')
 	while True:
