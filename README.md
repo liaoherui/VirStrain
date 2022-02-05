@@ -5,10 +5,10 @@ An RNA virus strain-level identification tool for short reads.
 
 
 ### E-mail: heruiliao2-c@my.cityu.edu.hk
-### Version: V1.11
+### Version: V1.12
 #### *__[Update - 2022 - 02 - 05]__* :  <BR/>
  
-* *V1.11: VirStrain is able to take gzipped FASTQs as input now! <BR/>*
+* *V1.12: VirStrain is able to take gzipped FASTQs as input now! <BR/>*
 ---------------------------------------------------------------------------
 ### Dependencies:
 * Python >=3.6 (3.7.3 is recommanded and 3.9 is not supprted now!)
@@ -28,7 +28,7 @@ Once you have bioconda environment installed, install package virstrain:
 
 The second way to install VirStrain, is to use [pip](https://pypi.org/project/virstrain/):
 
-	pip install virstrain==1.11
+	pip install virstrain==1.12
 
 It should be noted that some commands have been replaced if you install VirStrain using bioconda/pip. (See below)
 
