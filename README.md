@@ -52,19 +52,13 @@ There are three ways to download the reference database.<BR/><BR/>
 Run:<BR/>
 `cd VirStrain`<BR/>
 `sh download.sh`<BR/> <BR/>
--> Method-2:<BR/>
+
+#### *__[Update - 2022 - 02 - 08]__* :  <BR/>
+
+* *-> Method-2:<BR/>*
 Run:<BR/>
-`cd VirStrain`<BR/>
-`wget https://github.com/liaoherui/VirStrain/raw/main/VirStrain_DB.tar.gz`<BR/>
-`tar -zxvf VirStrain_DB.tar.gz`<BR/>
-`rm VirStrain_DB.tar.gz` <BR/> <BR/>
--> Method-3:<BR/>
-If you have installed `git lfs`, then you can simply run: <BR/>
-`git lfs clone https://github.com/liaoherui/VirStrain.git`<BR/>
-Then the database will be cloned with the repository. Then, run: <BR/>
-`cd VirStrain`<BR/>
-`tar -zxvf VirStrain_DB.tar.gz`<BR/>
-`rm VirStrain_DB.tar.gz` <BR/>
+`wget -qO- "https://figshare.com/ndownloader/files/34002479" | tar -zx`<BR/>
+Or, download the database from [figshare](https://figshare.com/articles/dataset/VirStrain_DB_tar_gz/19134590/1) mannually, and then extract it using the command `tar -zxvf`.
 
 If all failed, please email to the author to get the database.
 
