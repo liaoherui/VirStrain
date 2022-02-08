@@ -17,7 +17,7 @@ An RNA virus strain-level identification tool for short reads.
 
 (If you have installed conda, then you can run `sh install_package.sh` to install all required packages automatically.)
 
-Make sure these programs have been installed before using VirStrain. (However, if you use bioconda to install VirStrain, ignore this.)
+Make sure these programs have been installed before using VirStrain. (However, if you use bioconda/pip to install VirStrain, ignore this.)
 
 ## Install (Linux or ubuntu only)
 
