@@ -57,6 +57,7 @@ Run:<BR/>
 
 * *-> Method-2:<BR/>*
 Run:<BR/>
+`cd VirStrain`<BR/>
 `wget -qO- "https://figshare.com/ndownloader/files/34002479" | tar -zx`<BR/>
 Or, download the database from [figshare](https://figshare.com/articles/dataset/VirStrain_DB_tar_gz/19134590/1) mannually, and then extract it using the command `tar -zxvf`.
 
