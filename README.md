@@ -5,7 +5,8 @@ An RNA virus strain-level identification tool for short reads.
 
 
 ### E-mail: heruiliao2-c@my.cityu.edu.hk
-### Version: V1.12
+### Recommanded Version: V1.12
+* *Old Version - V1.10: Add new functions. Can not take gzipped FASTQs as input. <BR/>*
 #### *__[Update - 2022 - 02 - 05]__* :  <BR/>
  
 * *V1.12: VirStrain is able to take gzipped FASTQs as input now! <BR/>*
