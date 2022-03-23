@@ -43,6 +43,7 @@ while(<IN>)
 }
 close(IN);
 
+
 #handle the last sequence in the multi-fasta file
 if($string ne "")
 {
@@ -142,6 +143,7 @@ for(my $i=0; $i<5; $i++)
 
 #clusterG is the number of sequences inside clusters
 my $clusteredseq="";
+my @clusteredseqarr;
 my $clusterG=0;
 
 my $columncount=@columnset;
@@ -150,6 +152,7 @@ my $mincol=-1;
 
 while ($columncount>0 && $clusterG<$seqn)
 {
+    #print $columncount,",",$clusterG,",",$seqn,"\n";
     for(my $i=0; $i<@columnset; $i++)
     {
 	if($columnset[$i]>=0)
@@ -190,6 +193,7 @@ while ($columncount>0 && $clusterG<$seqn)
 	#$columncount--;
 
 	my @lineset;
+    my $tem='';
 	my $mincharct=$seqn;
 	my $minchar="";
 	my $cnt=$countarray[$mincol];
@@ -209,10 +213,17 @@ while ($columncount>0 && $clusterG<$seqn)
 	{
 	    if($seq[$cx][$markcol] eq $minchar) 
 	    {
-		if($clusteredseq!~/$seqname[$cx]/)
-		    {push(@lineset, $cx);} 
+        $tem=!($seqname[$cx]~~@clusteredseqarr);
+        if ($tem eq 1)
+        { push(@lineset, $cx);}
 		print $seqname[$cx]," ";
-		if($clusteredseq!~/$seqname[$cx]/) {$clusteredseq.=" $seqname[$cx]"; $clusterG++;}
+		if ($tem eq 1) 
+        {
+        $clusteredseq.=" $seqname[$cx]"; 
+        push(@clusteredseqarr, $seqname[$cx]);
+        $clusterG++;
+        }
+    
 	    }
 	}
 	if(@lineset>=0) {print $markcol," ", $minchar,"\n"};

@@ -275,7 +275,7 @@ for c in cls_strain:
 				k2=seq.reverse_complement()._data
 				o3.write(k2+'\t'+c+'\t'+info1+'\t'+info2+'\n')
 				
-os.system('rm Vbuild_tem.column Vbuild_tem_cls.aln')
+#os.system('rm Vbuild_tem.column Vbuild_tem_cls.aln')
 plt.hist(raw_cls_size,bins=100)
 plt.xlabel('Cluster size')
 plt.ylabel('Cluster Number')
