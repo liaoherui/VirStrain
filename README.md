@@ -17,7 +17,7 @@ An RNA virus strain-level identification tool for short reads.
 
 #### *__[Update - 2022 - 11 - 10]__* :  <BR/>
 
-* *Update a new parameter '-s' that allows for sorting the most possible strain by matches to the sites.*
+* *Update a new parameter '-s' that allows sorting the most possible strain by matches to the sites.*
 ---------------------------------------------------------------------------
 ### Dependencies:
 * Python >=3.6 (3.7.3 is recommanded and 3.9 is not supprted now!)
