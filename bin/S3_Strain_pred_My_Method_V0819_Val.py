@@ -290,6 +290,15 @@ if rks==1:
 else:
 	res=sorted(dmap_rate.items(),key=lambda d:d[1],reverse=True)
 top10_score_s=res[:10]
+if rks==1:
+	top10_score_s_old=top10_score_s
+	top10_score_s=[]
+	for r in top10_score_s_old:
+		tem=(r[0],dmap_rate[r[0]])
+		top10_score_s.append(tem)
+#print(top10_score_s_old,top10_score_s)
+#exit()
+
 #print(top10_score_s)
 #exit()
 top_map_strain=[]
