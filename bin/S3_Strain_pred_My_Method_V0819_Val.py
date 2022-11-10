@@ -190,6 +190,7 @@ ds_pos={}  # Strain -> 0 1 1 0 0 1 (pos-snp: yes or no vector)
 ds_freq={} # Strain -> frequency vector of this strain
 dmap_rate={} # Strain -> pos-snp map scpre of this strain
 #ds_avgd={}  # Strain -> average depth of this strain
+ds_num_m={} # Strain -> pos-snp map number
 ds_num={} # Strain -> pos-snp map number, raw number
 dmr={}  # Strain -> pos-snp map rate os this strain (map_number/raw_number)
 #These 2 dict will be used to visualize the pos depth figure
@@ -228,6 +229,7 @@ while True:
 	#dmap_rate[ele[0]]=map_rate
 	dmap_rate[ele[0]]=map_rate
 	ds_num[ele[0]]=str(map_c)+'/'+str(raw_c)
+	ds_num_m[ele[0]]=int(map_c)
 	dmr[ele[0]]=float(map_c)/float(raw_c)
 	#value=nt.sum()
 	#des[ele[0]]=value
@@ -284,10 +286,11 @@ exit()
 max_map=sorted(dmr.items(),key=lambda d:d[1],reverse=True)[0][1]
 #exit()
 if rks==1:
-	res=sorted(ds_num.items(),key=lambda d:d[1],reverse=True)
+	res=sorted(ds_num_m.items(),key=lambda d:d[1],reverse=True)
 else:
 	res=sorted(dmap_rate.items(),key=lambda d:d[1],reverse=True)
 top10_score_s=res[:10]
+#print(top10_score_s)
 #exit()
 top_map_strain=[]
 for r in res:
