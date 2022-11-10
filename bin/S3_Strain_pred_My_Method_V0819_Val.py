@@ -14,7 +14,7 @@ import numpy as np
 #from sklearn.linear_model import Lasso, LassoCV
 #from scipy.stats import pearsonr
 
-opts,args=getopt.getopt(sys.argv[1:],"i:p:k:m:s:f:c:b:d:o:")
+opts,args=getopt.getopt(sys.argv[1:],"i:p:k:m:s:f:c:b:d:r:o:")
 read_1=''	# SE or long reads
 read_2=''	# PE reads - read set 2
 snp_kmr_file='' #kmer -> snp_pos file
@@ -23,6 +23,7 @@ matrix_file='' # Sno-pos matrix file
 cls_file=''
 sub_kmr_file=''
 out_dir=''
+rks=''
 db_dir=''
 
 k=25		# Default k size=25
@@ -52,8 +53,11 @@ for opt,arg in opts:
 		sub_kmr_file=arg
 	elif opt=='-d':
 		db_dir=arg
+	elif opt=='-r':
+		rks=int(arg)
 	elif opt=='-o':
 		out_dir=arg
+
 
 ## Static variables
 BASE_ORDER=['A','T','G','C']
@@ -279,7 +283,10 @@ exit()
 #print(ds_pos['>MN938384.1'][index])
 max_map=sorted(dmr.items(),key=lambda d:d[1],reverse=True)[0][1]
 #exit()
-res=sorted(dmap_rate.items(),key=lambda d:d[1],reverse=True)
+if rks==1:
+	res=sorted(ds_num.items(),key=lambda d:d[1],reverse=True)
+else:
+	res=sorted(dmap_rate.items(),key=lambda d:d[1],reverse=True)
 top10_score_s=res[:10]
 #exit()
 top_map_strain=[]
