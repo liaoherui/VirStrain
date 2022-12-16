@@ -18,6 +18,10 @@ An RNA virus strain-level identification tool for short reads.
 #### *__[Update - 2022 - 11 - 10]__* :  <BR/>
 
 * *Update a new parameter '-s' that allows sorting the most possible strain by matches to the sites.*
+
+#### *__[Update - 2022 - 12 - 16]__* :  <BR/>
+
+* *The web server extension of VirStrain - StrainDetect (https://strain.ee.cityu.edu.hk) is online now!*
 ---------------------------------------------------------------------------
 ### Dependencies:
 * Python >=3.6 (3.7.3 is recommanded and 3.9 is not supprted now!)
