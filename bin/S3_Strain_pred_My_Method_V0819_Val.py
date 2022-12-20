@@ -230,7 +230,10 @@ while True:
 	dmap_rate[ele[0]]=map_rate
 	ds_num[ele[0]]=str(map_c)+'/'+str(raw_c)
 	ds_num_m[ele[0]]=int(map_c)
-	dmr[ele[0]]=float(map_c)/float(raw_c)
+	if float(raw_c)==0:
+		dmr[ele[0]]=0
+	else:
+		dmr[ele[0]]=float(map_c)/float(raw_c)
 	#value=nt.sum()
 	#des[ele[0]]=value
 	ds_pos[ele[0]]=tem
