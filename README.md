@@ -22,6 +22,10 @@ An RNA virus strain-level identification tool for short reads.
 #### *__[Update - 2022 - 12 - 16]__* :  <BR/>
 
 * *The web server extension of VirStrain - StrainDetect (https://strain.ee.cityu.edu.hk) is online now!*
+
+#### *__[Update - 2022 - 12 - 20]__* :  <BR/>
+
+* *V1.13: Fix a database generation bug in V1.12 of bioconda version! <BR/>*
 ---------------------------------------------------------------------------
 ### Dependencies:
 * Python >=3.6 (3.7.3 is recommanded and 3.9 is not supprted now!)
