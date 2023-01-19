@@ -114,7 +114,7 @@ For HIV:<BR/>
 ### Use VirStrain to build your own custom database.<BR/>
   `python VirStrain_build.py -i <Input_MSA> -d <Database_Dir>`<BR/>
   
-  For small-scale strains (<1000) or viruses with large genome sizes (like HCMV), you can use manual-covering function to cover more useful sites. For example, in our experiment, we used "-s 0.4" for 328 HCMV strains. Usually, 0.2~0.6 shoule be a suitable range for the parameter "-s". However, if you only have very few strains, like 3 strains, you can also use a greater value like "-s 0.8".
+  For small-scale strains (<1000 input strains) or viruses with large genome sizes (like HCMV), you can use manual-covering function to cover more useful sites. For example, in our experiment, we used "-s 0.4" for 328 HCMV strains. Usually, 0.2~0.6 shoule be a suitable range for the parameter "-s". However, if you only have very few strains, like 3 strains, you can also use a greater value like "-s 0.8".
   
   `python VirStrain_build.py -i <Input_MSA> -d <Database_Dir> -s 0.4`<BR/>
 
