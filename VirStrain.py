@@ -42,7 +42,7 @@ def main():
 		if os.path.exists('VirStrain_report.txt'):
 			os.system('python bin/S4_Plot_strain_cov.py')
 			os.system('mv VirStrain_report.txt VirStrain_report.html Mps_ps_depth.csv Ops_ps_depth.csv '+out_dir)
-			exit()
+		exit()
 	# Start to identify strains
 	if not in_read2: # SE reads
 		if rks==0:
