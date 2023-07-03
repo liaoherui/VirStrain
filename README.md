@@ -26,6 +26,9 @@ An RNA virus strain-level identification tool for short reads.
 #### *__[Update - 2022 - 12 - 20]__* :  <BR/>
 
 * *V1.13: Fix a database generation bug in V1.12 of bioconda version! <BR/>*
+
+#### *__[Update - 2023 - 07 - 03]__* :  <BR/>
+* *A new function that allows comprehensive (including strains of different viral species) viral strain identification for assembled genomes! (Under development) <BR/>*
 ---------------------------------------------------------------------------
 ### Dependencies:
 * Python >=3.6 (3.7.3 is recommanded and 3.9 is not supprted now!)
