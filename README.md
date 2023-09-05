@@ -26,9 +26,9 @@ An RNA virus strain-level identification tool for short reads.
 #### *__[Update - 2022 - 12 - 20]__* :  <BR/>
 
 * *V1.13: Fix a database generation bug in V1.12 of bioconda version! <BR/>*
-
- <!--- #### *__[Update - 2023 - 07 - 03]__* :  <BR/>  -->
-  <!---  * *A new function that allows comprehensive (including strains of different viral species) viral strain identification for assembled contigs is  coming soon! (Under development) <BR/>* -->
+ <!----->
+#### *__[Update - 2023 - 09 - 05]__* :  <BR/> 
+* *A new function that allows comprehensive (including 45619 strains of 28 viral species) viral strain identification for assembled contigs is available!  <BR/>* 
 ---------------------------------------------------------------------------
 ### Dependencies:
 * Python >=3.6 (3.7.3 is recommanded and 3.9 is not supprted now!)
@@ -113,6 +113,15 @@ When the virus has high mutation rate, like HIV, you may need to add `-m` parame
 For HIV:<BR/>
   SE reads: `python VirStrain.py -i <Read1> -d VirStrain_DB/HIV -o <Output_dir> -m`<BR/>
   PE reads: `python VirStrain.py -i <Read1> -p <Read2> -d VirStrain_DB/HIV -o <Output_dir> -m`<BR/>
+
+### *__[Update - 2023 - Sep]__* Use VirStrain to identify RNA virus strains in assembled contigs.
+
+`python VirStrain_contig.py -i <Input_Contig_fasta> -v 1 -d VirStrain_contig_DB -o VirStrain_Contig_Res`<BR/>
+
+You can use the command below to download the pre-built comprehensive viral strain database for contig identification:
+
+`sh download_contig_db.sh`
+
 
 ### Use VirStrain to build your own custom database.<BR/>
 
