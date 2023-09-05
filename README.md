@@ -28,7 +28,7 @@ An RNA virus strain-level identification tool for short reads.
 * *V1.13: Fix a database generation bug in V1.12 of bioconda version! <BR/>*
  <!----->
 #### *__[Update - 2023 - 09 - 05]__* :  <BR/> 
-* *A new function that allows comprehensive (including 45619 strains of 28 viral species) viral strain identification for assembled contigs is available!  <BR/>* 
+* *A new function that allows comprehensive (including **45619** strains of **28** viral species) viral strain identification for assembled contigs is available!  <BR/>* 
 ---------------------------------------------------------------------------
 ### Dependencies:
 * Python >=3.6 (3.7.3 is recommanded and 3.9 is not supprted now!)
