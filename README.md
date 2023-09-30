@@ -7,6 +7,10 @@ An RNA virus strain-level identification tool for short reads.
 ### E-mail: heruiliao2-c@my.cityu.edu.hk
 ### Recommanded Version: V1.13
 * *Old Version - V1.10: Add new functions. Can not take gzipped FASTQs as input. <BR/>*
+
+<details>
+<summary> Click me to check the log of all updates </summary>
+  
 #### *__[Update - 2022 - 02 - 05]__* :  <BR/>
  
 * *V1.12: VirStrain is able to take gzipped FASTQs as input now! <BR/>*
@@ -27,6 +31,8 @@ An RNA virus strain-level identification tool for short reads.
 
 * *V1.13: Fix a database generation bug in V1.12 of bioconda version! <BR/>*
  <!----->
+ </details>
+ 
 #### *__[Update - 2023 - 09 - 05]__* :  <BR/> 
 * *A new function that allows comprehensive (including **45619** strains of **28** viral species) viral strain identification for assembled contigs is available!  <BR/>* 
 ---------------------------------------------------------------------------
