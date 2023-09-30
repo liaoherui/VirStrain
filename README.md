@@ -9,7 +9,7 @@ An RNA virus strain-level identification tool for short reads.
 * *Old Version - V1.10: Add new functions. Can not take gzipped FASTQs as input. <BR/>*
 
 <details>
-<summary> Click me to check the log of all updates </summary>
+<summary> Click here to check the log of all updates </summary>
   
 #### *__[Update - 2022 - 02 - 05]__* :  <BR/>
  
