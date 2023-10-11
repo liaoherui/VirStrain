@@ -64,7 +64,7 @@ python VirStrain.py -h | virstrain -h
 python VirStrain_build.py -h | virstrain_build -h
 
 
-Or you can install VirStrain mannually.
+Or you can install VirStrain mannually (Make sure all dependencies have been installed before this step).
 ####
 `git clone https://github.com/liaoherui/VirStrain.git`<BR/>
 `cd VirStrain`<BR/>
