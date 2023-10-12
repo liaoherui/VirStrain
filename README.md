@@ -34,7 +34,10 @@ An RNA virus strain-level identification tool for short reads.
  </details>
  
 #### *__[Update - 2023 - 09 - 05]__* :  <BR/> 
-* *A new function that allows comprehensive (including **45619** strains of **28** viral species) viral strain identification for assembled contigs is available!  <BR/>* 
+* *A new function that allows comprehensive (including **45619** strains of **28** viral species) viral strain identification for assembled contigs is available!  <BR/>*
+
+#### *__[Update - 2023 - 10 - 12]__* :  <BR/> 
+* *V1.14: Fix a bug (about handling gzipped FASTQs) in V1.13! <BR/>*
 ---------------------------------------------------------------------------
 ### Dependencies:
 * Python >=3.6 (3.7.3 is recommanded and 3.9 is not supprted now!)
