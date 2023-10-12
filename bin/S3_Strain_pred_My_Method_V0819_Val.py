@@ -687,12 +687,12 @@ if not len(candidate_cls)==0:
 	ok.close()
 	if read_2=='':
 		if re.split('\.',read_1)[-1]=='gz':
-			cmd1='zcat '+read_1+' | '+file_dir+'/jellyfish-linux count /dev/fd/0 -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS.jf'
+			cmd1='zcat '+read_1+' | '+file_dir+'/jellyfish-linux count /dev/fd/0 -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS2.jf'
 		else:
 			cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if Tem_Vs2Sub.fa -o Tem_VS2.jf '+read_1
 	else:
 		if re.split('\.',read_1)[-1]=='gz' or re.split('\.',read_2)[-1]=='gz':
-			cmd1='zcat '+read_1+' '+read_2+' | '+file_dir+'/jellyfish-linux count /dev/fd/0 -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS.jf'
+			cmd1='zcat '+read_1+' '+read_2+' | '+file_dir+'/jellyfish-linux count /dev/fd/0 -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS2.jf'
 		else:
 			cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if Tem_Vs2Sub.fa -o Tem_VS2.jf '+read_1+' '+read_2
 	cmd2=file_dir+'/jellyfish-linux dump -c Tem_VS2.jf > Tem_Vs2.fa'
