@@ -7,6 +7,7 @@ import subprocess
 #from Bio.Seq import Seq
 #from Bio.Alphabet import IUPAC
 import numpy as np
+import uuid
 #import pandas as pd
 ### Dehan Method Check
 #from scipy import sparse
@@ -69,6 +70,7 @@ MAX_NITER = 5000
 TEST_SIZE = 0.5
 '''
 file_dir=sys.path[0]
+uid=uuid.uuid1().hex
 #print(file_dir)
 #exit()
 
@@ -99,10 +101,10 @@ pos_snp=re.split('\t',fl) # Head line arr
 # Run jellyfish to get kmer counting result
 if read_2=='':
 	if re.split('\.',read_1)[-1]=='gz':
-		cmd1='zcat '+read_1+' | '+file_dir+'/jellyfish-linux count /dev/fd/0 -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS.jf '
+		cmd1='zcat '+read_1+' | '+file_dir+'/jellyfish-linux count /dev/fd/0 -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS_'+uid+'.jf '
 	else:
-		cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS.jf '+read_1
-	cmd2=file_dir+'/jellyfish-linux dump -c Tem_VS.jf > Tem_Vs.fa'
+		cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS_'+uid+'.jf '+read_1
+	cmd2=file_dir+'/jellyfish-linux dump -c Tem_VS_'+uid+'.jf > Tem_Vs_'+uid+'.fa'
 	if re.split('\.',read_1)[-1]=='gz':
 		subprocess.check_output(cmd1,shell=True)
 	else:
@@ -110,10 +112,10 @@ if read_2=='':
 	os.system(cmd2)
 else:
 	if re.split('\.',read_1)[-1]=='gz' or re.split('\.',read_2)[-1]=='gz':
-		cmd1='zcat '+read_1+' '+read_2+' | '+file_dir+'/jellyfish-linux count /dev/fd/0 -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS.jf '
+		cmd1='zcat '+read_1+' '+read_2+' | '+file_dir+'/jellyfish-linux count /dev/fd/0 -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS_'+uid+'.jf '
 	else:
-		cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS.jf '+read_1+' '+read_2
-	cmd2=file_dir+'/jellyfish-linux dump -c Tem_VS.jf > Tem_Vs.fa'
+		cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS_'+uid+'.jf '+read_1+' '+read_2
+	cmd2=file_dir+'/jellyfish-linux dump -c Tem_VS_'+uid+'.jf > Tem_Vs_'+uid+'.fa'
 	if re.split('\.',read_1)[-1]=='gz' or re.split('\.',read_2)[-1]=='gz':
 		subprocess.check_output(cmd1,shell=True)
 	else:
@@ -122,7 +124,7 @@ else:
 	
 
 freq_arr=[]
-fnew=open('Tem_Vs.fa','r')
+fnew=open('Tem_Vs_'+uid+'.fa','r')
 while True:
 	line=fnew.readline().strip()
 	if not line:break
@@ -678,7 +680,7 @@ if not len(candidate_cls)==0:
 			for s in sub:
 				ksub[kmr][ele[1]][s]=''
 				cls_sub[ele[1]][s]=0
-	ok=open('Tem_Vs2Sub.fa','w+')
+	ok=open('Tem_Vs2Sub_'+uid+'.fa','w+')
 	co=1
 	for kmr in ksub:
 		ok.write('>'+str(co)+'\n')
@@ -687,21 +689,21 @@ if not len(candidate_cls)==0:
 	ok.close()
 	if read_2=='':
 		if re.split('\.',read_1)[-1]=='gz':
-			cmd1='zcat '+read_1+' | '+file_dir+'/jellyfish-linux count /dev/fd/0 -m 25 -s 100M -t 8 --if Tem_Vs2Sub.fa -o Tem_VS2.jf'
+			cmd1='zcat '+read_1+' | '+file_dir+'/jellyfish-linux count /dev/fd/0 -m 25 -s 100M -t 8 --if Tem_Vs2Sub_'+uid+'.fa -o Tem_VS2_'+uid+'.jf'
 		else:
-			cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if Tem_Vs2Sub.fa -o Tem_VS2.jf '+read_1
+			cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if Tem_Vs2Sub_'+uid+'.fa -o Tem_VS2_'+uid+'.jf '+read_1
 	else:
 		if re.split('\.',read_1)[-1]=='gz' or re.split('\.',read_2)[-1]=='gz':
-			cmd1='zcat '+read_1+' '+read_2+' | '+file_dir+'/jellyfish-linux count /dev/fd/0 -m 25 -s 100M -t 8 --if Tem_Vs2Sub.fa -o Tem_VS2.jf'
+			cmd1='zcat '+read_1+' '+read_2+' | '+file_dir+'/jellyfish-linux count /dev/fd/0 -m 25 -s 100M -t 8 --if Tem_Vs2Sub_'+uid+'.fa -o Tem_VS2_'+uid+'.jf'
 		else:
-			cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if Tem_Vs2Sub.fa -o Tem_VS2.jf '+read_1+' '+read_2
-	cmd2=file_dir+'/jellyfish-linux dump -c Tem_VS2.jf > Tem_Vs2.fa'
+			cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if Tem_Vs2Sub_'+uid+'.fa -o Tem_VS2_'+uid+'.jf '+read_1+' '+read_2
+	cmd2=file_dir+'/jellyfish-linux dump -c Tem_VS2_'+uid+'.jf > Tem_Vs2_'+uid+'.fa'
 	if re.split('\.',read_1)[-1]=='gz':
 		subprocess.check_output(cmd1,shell=True)
 	else:
 		os.system(cmd1)
 	os.system(cmd2)
-	ft2=open('Tem_Vs2.fa','r')
+	ft2=open('Tem_Vs2_'+uid+'.fa','r')
 	while True:
 		line=ft2.readline().strip()
 		if not line:break
@@ -802,7 +804,7 @@ for t in top10_score_s:
 		else:
 			o.write('\t\t'+t[0]+'\t'+s2cls[t[0]]+'\tNot_record\t'+str(t[1])+'\t'+ds_num[t[0]]+'\t'+ds_num[t[0]]+'\t'+dc[t[0]]+'\tNA\n')
 ## Remove tem file 
-os.system('rm Tem_Vs* Tem_VS*')
+os.system('rm Tem_Vs_'+uid+'* Tem_VS_'+uid+'*')
 ## From this line, we will generate strain-level analysis report
 print('Txt report is done. Now will generate pdf report!')
 
