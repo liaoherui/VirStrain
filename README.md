@@ -38,6 +38,9 @@ An RNA virus strain-level identification tool for short reads.
 
 #### *__[Update - 2023 - 10 - 12]__* :  <BR/> 
 * *V1.14: Fix a bug (about handling gzipped FASTQs) in V1.13! <BR/>*
+
+#### *__[Update - 2024 - 02 - 27]__* :  <BR/> 
+* *Tem_Vs files are named randomly (only GitHub version) and links for pre-built databases are provided. <BR/>*
 ---------------------------------------------------------------------------
 ### Dependencies:
 * Python >=3.6 (3.7.3 is recommanded and 3.9 is not supprted now!)
