@@ -105,7 +105,7 @@ If all failed, please email to the author to get the database.
 You can also build the VirStrain database with your own genomes, the mannual is written in Usage section.
 
 ## Pre-built databases download
-In the event that the download scripts fail to retrieve the pre-built database, we also provide a link to access all pre-built databases. The table below offers information about the public pre-built databases. Users can download these databases and use them to identify viral strains directly.
+In the event that the download scripts fail to retrieve the pre-built database, we also provide Google drive inks to access all pre-built databases. The table below offers information about the public pre-built databases. Users can download these databases and use them to identify viral strains directly.
 Name   |	Description   |	Download link
 ------------ | ------------- | ------------- 
 VirStrain_DB.tar.gz |  Databases containing SCOV2, H1N1, and HIV viral strains used in the paper | [Google drive](https://drive.google.com/file/d/1XYqr64tJec7VeDBD0Xc9cuUZqmawoty6/view?usp=sharing)
