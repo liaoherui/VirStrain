@@ -101,6 +101,15 @@ If all failed, please email to the author to get the database.
 
 You can also build the VirStrain database with your own genomes, the mannual is written in Usage section.
 
+## Pre-built databases download
+The table below offers information about the public pre-built databases. Users can download these databases and use them to identify viral strains directly.
+Name   |	Description   |	Download link
+------------ | ------------- | ------------- 
+VirStrain_DB.tar.gz |  Databases containing SCOV2, H1N1, and HIV viral strains used in the paper | [Google drive](https://drive.google.com/file/d/1XYqr64tJec7VeDBD0Xc9cuUZqmawoty6/view?usp=sharing)
+SCOV2_newBig.tar.gz |  Databases containing more SCOV2 viral strains used in the paper   | [Google drive](https://drive.google.com/file/d/1qAHjVADTiV3G00YekqystUXT2e7Ho2kq/view?usp=sharing)
+VirStrain_DNA_DB.tar.gz  | Databases containing two DNA viral (HBV and HCMV) strains used in the paper | [Google drive](https://drive.google.com/file/d/1INmaOpBKYFXj1gAngG6CikT7xVjmxsGZ/view?usp=sharing)
+VirStrain_contig_DB.tar.gz | Contig-level database | [Google drive](https://drive.google.com/file/d/1oj-86Njz5mnY6djbhdv23a9r9OH5oqog/view?usp=sharing)
+
 ## Usage
 It should be noted if you install VirStrain using bioconda/pip, you should replace the commands. (see below)
 
