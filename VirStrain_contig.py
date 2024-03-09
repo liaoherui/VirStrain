@@ -69,7 +69,7 @@ def main():
 	parser.add_argument('-d','--database_dir',dest='db_dir',type=str,required=True,help='Database dir --- Required')
 	parser.add_argument('-o','--output_dir',dest='out_dir',type=str,help='Output dir (default: current dir/VirStrain_Out)')
 	parser.add_argument('-c','--site_filter_cutoff',dest='sf_cutoff',type=str,help='The cutoff of filtering one site (default: 0.05)')
-	parser.add_argument('-v', '--comprehensive_mode', dest='cv_mode', type=str,help='If set to 1, then VirStrain will identify viral strains for input contigs in a more comprehensive database. (default: 0)')
+	#parser.add_argument('-v', '--comprehensive_mode', dest='cv_mode', type=str,help='If set to 1, then VirStrain will identify viral strains for input contigs in a more comprehensive database. (default: 0)')
 	parser.add_argument('-s','--rank_by_sites',dest='rk_site',type=str,help='If set to 1, then VirStrain will sort the most possible strain by matches to the sites. (default: 0)')
 	parser.add_argument('-m','--high_mutation_virus',dest='hm_virus',help='If the virus has high mutation rate, use this option. (default: Not use)',default='1',nargs='?')
 
@@ -80,7 +80,7 @@ def main():
 	db_dir=args.db_dir
 	out_dir=args.out_dir
 	sfc=args.sf_cutoff
-	cvm = args.cv_mode
+	cvm = 1
 	rks=args.rk_site
 	hm=args.hm_virus
 	if not cvm:
