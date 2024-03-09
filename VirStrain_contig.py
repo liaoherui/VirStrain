@@ -63,9 +63,9 @@ def split_contig(ingenome,kmers,o):
      
 def main():
 	parser=argparse.ArgumentParser(prog='VirStrain.py',description=usage)
-	parser.add_argument('-i','--input_reads',dest='input_reads',type=str,required=True,help="Input fastq data --- Required")
+	parser.add_argument('-i','--input_contigs',dest='input_contigs',type=str,required=True,help="Input contig fasta data --- Required")
 
-	parser.add_argument('-p','--input_reads2',dest='input_reads2',type=str,help="Input fastq data for PE reads.")
+	#parser.add_argument('-p','--input_reads2',dest='input_reads2',type=str,help="Input fastq data for PE reads.")
 	parser.add_argument('-d','--database_dir',dest='db_dir',type=str,required=True,help='Database dir --- Required')
 	parser.add_argument('-o','--output_dir',dest='out_dir',type=str,help='Output dir (default: current dir/VirStrain_Out)')
 	parser.add_argument('-c','--site_filter_cutoff',dest='sf_cutoff',type=str,help='The cutoff of filtering one site (default: 0.05)')
@@ -75,8 +75,8 @@ def main():
 
 	
 	args=parser.parse_args()	
-	in_read1=args.input_reads
-	in_read2=args.input_reads2
+	in_read1=args.input_contigs
+	in_read2=''
 	db_dir=args.db_dir
 	out_dir=args.out_dir
 	sfc=args.sf_cutoff
