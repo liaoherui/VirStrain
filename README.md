@@ -135,9 +135,9 @@ For HIV:<BR/>
   SE reads: `python VirStrain.py -i <Read1> -d VirStrain_DB/HIV -o <Output_dir> -m`<BR/>
   PE reads: `python VirStrain.py -i <Read1> -p <Read2> -d VirStrain_DB/HIV -o <Output_dir> -m`<BR/>
 
-### *__[Update - 2023 - Sep]__* Use VirStrain to identify viral strains for assembled contigs.
+### *__[Update - 2023 - Sep]__* Use VirStrain_contig to identify viral strains for assembled contigs.
 
-`python VirStrain_contig.py -i <Input_Contig_fasta> -v 1 -d VirStrain_contig_DB -o VirStrain_Contig_Res`<BR/>
+`python VirStrain_contig.py -i <Input_Contig_fasta> -d VirStrain_contig_DB -o VirStrain_Contig_Res`<BR/>
 
 You can use the command below to download the pre-built comprehensive viral strain database for contig identification:
 
