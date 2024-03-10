@@ -18,7 +18,7 @@ def scan(ingenome,db):
     #print(file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if '+db+' -o Tem_Vs.jf '+ingenome)
     os.system(file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if '+db+' -o Tem_Vs_'+uid2+'.jf '+ingenome)
     #print(file_dir+'/jellyfish-linux dump  Tem_Vs.jf > Tem_Vs.fa')
-    os.system(file_dir+'/jellyfish-linux dump -c Tem_Vs_'+uid2+'.jf > Tem_Vs_'+uid2'.fa') 
+    os.system(file_dir+'/jellyfish-linux dump -c Tem_Vs_'+uid2+'.jf > Tem_Vs_'+uid2+'.fa') 
     f=open('Tem_Vs_'+uid2+'.fa','r')
     dr={}
     while True:
