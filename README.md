@@ -68,6 +68,8 @@ Command (Not bioconda/pip)    |	Command (bioconda/pip)
 ------------ | ------------- 
 python VirStrain.py -h | virstrain -h
 python VirStrain_build.py -h | virstrain_build -h
+python VirStrain_contig.py -h | virstrain_contig -h
+python VirStrain_contigDB_merge.py -h | virstrain_merge -h
 
 
 Or you can install VirStrain mannually (Make sure all dependencies have been installed before this step).
