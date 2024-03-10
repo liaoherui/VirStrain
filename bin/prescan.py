@@ -1,5 +1,6 @@
 import re
 import os
+import uuid
 
 def scan(ingenome,db):
     file_dir=os.path.split(os.path.abspath(__file__))[0]
