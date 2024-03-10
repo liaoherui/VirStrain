@@ -122,6 +122,8 @@ Command (Not bioconda/pip)    |	Command (bioconda/pip)
 ------------ | ------------- 
 python VirStrain.py  | virstrain 
 python VirStrain_build.py | virstrain_build
+python VirStrain_contig.py -h | virstrain_contig -h
+python VirStrain_contigDB_merge.py -h | virstrain_merge -h
 
 ### Use VirStrain to identify RNA virus strains in short reads.
 
@@ -144,6 +146,10 @@ For HIV:<BR/>
 You can use the command below to download the pre-built comprehensive viral strain database for contig identification:
 
 `sh download_contig_db.sh`
+
+If you want to convert pre-built VirStrain database for reads (e.g. VirStrain_DB/SCOV2 and VirStrain_DB/H1N1) to database for contigs. Then you can try the command below:
+
+`python VirStrain_contigDB_merge.py -i VirStrain_DB/SCOV,VirStrain_DB/H1N1 -o VirStrain_contig_DB`
 
 
 ### Use VirStrain to build your own custom database.<BR/>
