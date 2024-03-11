@@ -193,6 +193,7 @@ optional arguments:
     -p, --input_reads2            Input fastq data for PE reads
     -c, --site_filter_cutoff      The cutoff of filtering one site when calculate the Vscore. (Default: 0.05)
     -s, --rank_by_sites		  If set to 1, then VirStrain will sort the most possible strain by matches to the sites. (default: 0)
+    -f, --turn_off_figures	  If set to 1, then VirStrain will not generate figures. (default: 0)
     -m, --high_mutation_virus     If the virus has high mutation rate (like HIV), use this option. (Default: off)
 ```
 Build database - VirStrain_build.py (Default k-mer size: 25)
