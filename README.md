@@ -5,8 +5,8 @@ An RNA virus strain-level identification tool for short reads.
 
 
 ### E-mail: heruiliao2-c@my.cityu.edu.hk
-### Recommanded Version: V1.14
-* *Old Version - V1.10: Add new functions. Can not take gzipped FASTQs as input. <BR/>*
+### Recommanded Version: V1.17
+* *Old Version - V1.14: Fix some bugs but lack virstrain_contig and virstrain_merge. <BR/>*
 
 <details>
 <summary> Click here to check the log of all updates </summary>
@@ -31,8 +31,8 @@ An RNA virus strain-level identification tool for short reads.
 
 * *V1.13: Fix a database generation bug in V1.12 of bioconda version! <BR/>*
  <!----->
- </details>
- 
+</details>
+  
 #### *__[Update - 2023 - 09 - 05]__* :  <BR/> 
 * *A new function that allows comprehensive (including **45619** strains of **28** viral species) viral strain identification for assembled contigs is available!  <BR/>*
 
@@ -41,6 +41,10 @@ An RNA virus strain-level identification tool for short reads.
 
 #### *__[Update - 2024 - 02 - 27]__* :  <BR/> 
 * *Tem_Vs files are named randomly (only GitHub version) and links for pre-built databases are provided. <BR/>*
+
+#### *__[Update - 2024 - 03 - 11]__* :  <BR/> 
+* *V1.17: All the changes made so far have been updated in both GitHub and Conda. <BR/>*
+    
 ---------------------------------------------------------------------------
 ### Dependencies:
 * Python >=3.6 (3.7.3 is recommanded and 3.9 is not supprted now!)
