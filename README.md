@@ -65,7 +65,7 @@ Once you have bioconda environment installed, install package virstrain:
 
 The second way to install VirStrain, is to use [pip](https://pypi.org/project/virstrain/):
 
-	pip install virstrain==1.14
+	pip install virstrain==1.17
 
 It should be noted that some commands have been replaced if you install VirStrain using bioconda/pip. (See below)
 
