@@ -154,7 +154,7 @@ You can use the command below to download the pre-built comprehensive viral stra
 
 If you want to convert pre-built VirStrain databases for reads (e.g. VirStrain_DB/SCOV2 and VirStrain_DB/H1N1) to database for contigs. Then you can try the command below:
 
-`python VirStrain_contigDB_merge.py -i VirStrain_DB/SCOV2,VirStrain_DB/H1N1 -o VirStrain_contig_DB`
+`python VirStrain_contigDB_merge.py -i VirStrain_DB/SCOV2,VirStrain_DB/H1N1 -o VirStrain_contig_DB_merge`
 
 
 ### Use VirStrain to build your own custom database.<BR/>
