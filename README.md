@@ -50,6 +50,7 @@ An RNA virus strain-level identification tool for short reads.
 * Python >=3.6 (3.7.3 is recommanded and 3.9 is not supprted now!)
 * Perl
 * Required python package: networkx==2.4, numpy==1.17.3, pandas==1.0.1, biopython==1.74, Plotly==3.10.0
+* Bowtie2 (for version >= V1.17)
 
 (If you have installed conda, then you can run `sh install_package.sh` to install all required packages automatically.)
 
