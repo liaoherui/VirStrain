@@ -46,7 +46,7 @@ An RNA virus strain-level identification tool for short reads.
 * *V1.17: All the changes made so far have been updated in both GitHub and Conda. <BR/>*
 
 #### *__[Update - 2024 - 05 - 28]__* :  <BR/> 
-* *V1.17: Add the parameter '-v' to show the version information. <BR/>*
+* *V1.17: Add the parameter '-v' to show the version information. (GitHub version available only) <BR/>*
     
 ---------------------------------------------------------------------------
 ### Dependencies:
