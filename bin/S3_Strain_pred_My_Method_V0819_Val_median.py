@@ -944,7 +944,7 @@ def main() -> int:
             top10_score_s,
         )
 
-        print("Txt report is done. Now will generate pdf report!")
+        print("Txt report is done. Now will generate CSV report!")
 
         vs_so = vs_so[:5]
         populate_visualization_dicts(
