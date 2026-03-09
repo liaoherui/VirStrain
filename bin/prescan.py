@@ -1,41 +1,121 @@
-import re
-import os
-import uuid
+#!/usr/bin/env python3
 
-def scan(ingenome,db):
-    file_dir=os.path.split(os.path.abspath(__file__))[0]
-    fd=open(db,'r')
-    d={}
-    while True:
-        line=fd.readline().strip()
-        if not line:break
-        if re.search('>',line):
-            pre=re.split('_',line)
-            pre='_'.join(pre[1:])
-        else:
-            d[line]=pre
-    uid2=uuid.uuid1().hex
-    #print(file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if '+db+' -o Tem_Vs.jf '+ingenome)
-    os.system(file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if '+db+' -o Tem_Vs_'+uid2+'.jf '+ingenome)
-    #print(file_dir+'/jellyfish-linux dump  Tem_Vs.jf > Tem_Vs.fa')
-    os.system(file_dir+'/jellyfish-linux dump -c Tem_Vs_'+uid2+'.jf > Tem_Vs_'+uid2+'.fa') 
-    f=open('Tem_Vs_'+uid2+'.fa','r')
-    dr={}
-    while True:
-        line=f.readline().strip()
-        if not line:break
-        ele=line.split()
-        if len(ele)<2:continue
-        if int(ele[-1])>0:
-            if d[ele[0]] not in dr:
-                dr[d[ele[0]]]=0
-            dr[d[ele[0]]]+=1
-    #print(dr)
-    res=sorted(dr.items(),key=lambda d:d[1],reverse=True)
-    if len(res)<1:
-        return 'NA',0
-    tsp=res[0][0]
-    #print(tsp)
-    #exit()
-    os.system('rm Tem_Vs_'+uid2+'.jf Tem_Vs_'+uid2+'.fa')
-    return tsp,res[0][1]
+from __future__ import annotations
+
+import subprocess
+import tempfile
+from pathlib import Path
+
+
+def scan(ingenome: str | Path, db: str | Path) -> tuple[str, int]:
+    """
+    Scan an input genome against the VirStrain merged DB using jellyfish.
+
+    Returns
+    -------
+    tuple[str, int]
+        Top matching species/database label and its matched kmer count.
+        Returns ('NA', 0) if no match is found.
+    """
+    file_dir = Path(__file__).resolve().parent
+    ingenome = Path(ingenome).resolve()
+    db = Path(db).resolve()
+
+    if not ingenome.exists():
+        raise FileNotFoundError(f"Input genome file not found: {ingenome}")
+    if not db.exists():
+        raise FileNotFoundError(f"Database file not found: {db}")
+
+    # Map kmer sequence -> species/database label
+    kmer_to_species: dict[str, str] = {}
+    current_species: str | None = None
+
+    with db.open("r", encoding="utf-8") as fd:
+        for raw_line in fd:
+            line = raw_line.strip()
+            if not line:
+                continue
+
+            if line.startswith(">"):
+                parts = line.split("_")
+                current_species = "_".join(parts[1:])
+            else:
+                if current_species is not None:
+                    kmer_to_species[line] = current_species
+
+    jellyfish_bin = file_dir / "jellyfish-linux"
+
+    with tempfile.TemporaryDirectory(prefix="virstrain_prescan_") as tmpdir:
+        tmpdir_path = Path(tmpdir)
+        jf_file = tmpdir_path / "Tem_Vs.jf"
+        fa_file = tmpdir_path / "Tem_Vs.fa"
+
+        try:
+            subprocess.run(
+                [
+                    str(jellyfish_bin),
+                    "count",
+                    "-m",
+                    "25",
+                    "-s",
+                    "100M",
+                    "-t",
+                    "8",
+                    "--if",
+                    str(db),
+                    "-o",
+                    str(jf_file),
+                    str(ingenome),
+                ],
+                check=True,
+            )
+
+            with fa_file.open("w", encoding="utf-8") as out_handle:
+                subprocess.run(
+                    [
+                        str(jellyfish_bin),
+                        "dump",
+                        "-c",
+                        str(jf_file),
+                    ],
+                    check=True,
+                    stdout=out_handle,
+                )
+
+            species_counts: dict[str, int] = {}
+
+            with fa_file.open("r", encoding="utf-8") as f:
+                for raw_line in f:
+                    line = raw_line.strip()
+                    if not line:
+                        continue
+
+                    fields = line.split()
+                    if len(fields) < 2:
+                        continue
+
+                    kmer = fields[0]
+                    try:
+                        count = int(fields[-1])
+                    except ValueError:
+                        continue
+
+                    if count > 0 and kmer in kmer_to_species:
+                        species = kmer_to_species[kmer]
+                        species_counts[species] = species_counts.get(species, 0) + 1
+
+            if not species_counts:
+                return "NA", 0
+
+            top_species, top_count = sorted(
+                species_counts.items(),
+                key=lambda item: item[1],
+                reverse=True,
+            )[0]
+
+            return top_species, top_count
+
+        finally:
+            # TemporaryDirectory handles cleanup automatically,
+            # but keeping the structure explicit here is fine.
+            pass
