@@ -1,837 +1,969 @@
+#!/usr/bin/env python3
+
+from __future__ import annotations
+
+import argparse
 import re
-import os
-import getopt
+import subprocess
 import sys
-#from collections import Counter
-#from Bio.Seq import Seq
-#from Bio.Alphabet import IUPAC
+from pathlib import Path
+
 import numpy as np
-#import pandas as pd
-### Dehan Method Check
-#from scipy import sparse
-#from sklearn.model_selection import ShuffleSplit
-#from sklearn.linear_model import Lasso, LassoCV
-#from scipy.stats import pearsonr
 
-opts,args=getopt.getopt(sys.argv[1:],"i:p:k:m:s:f:c:b:o:")
-read_1=''	# SE or long reads
-read_2=''	# PE reads - read set 2
-snp_kmr_file='' #kmer -> snp_pos file
-snp_kmr_fa='' # kmr fasta
-matrix_file='' # Sno-pos matrix file
-cls_file=''
-sub_kmr_file=''
-out_dir=''
-
-k=25		# Default k size=25
-#min_depth_rate=0.1
-min_depth_percentile=10
-max_depth_percentile=90
-min_depth_absolute=2
-#min_depth_rate=0.05
-min_depth_rate=0.05
-#threads=4
-for opt,arg in opts:
-	if opt=='-i':
-		read_1=arg
-	elif opt=='-p':
-		read_2=arg
-	elif opt=='-k':
-		k=int(arg)
-	elif opt=='-s':
-		snp_kmr_file=arg
-	elif opt=='-m':
-		matrix_file=arg
-	elif opt=='-f':
-		snp_kmr_fa=arg
-	elif opt=='-c':
-		cls_file=arg
-	elif opt=='-b':
-		sub_kmr_file=arg
-	elif opt=='-o':
-		out_dir=arg
-
-## Static variables
-BASE_ORDER=['A','T','G','C']
-BASE_P = {'A': [1, 0, 0, 0],'C':[0,1,0,0],'G':[0,0,1,0],'T':[0,0,0,1],}
-'''
-CV_NITER = 20
-NALPHA = 50
-MAX_NITER = 5000
-TEST_SIZE = 0.5
-'''
-file_dir=sys.path[0]
-#print(file_dir)
-#exit()
+BASE_ORDER = ["A", "T", "G", "C"]
+BASE_P = {
+    "A": [1, 0, 0, 0],
+    "C": [0, 1, 0, 0],
+    "G": [0, 0, 1, 0],
+    "T": [0, 0, 0, 1],
+}
 
 
-######### Step-1 Load Pre-build File to memory ####
-## Kmer -> POS-SNP
-f1=open(snp_kmr_file,'r')
-dkps={}  # kmr -> {pos-snp:1,......}
-pos=[]
-dpsc={} # pos-snp:  num
-while True:
-	line=f1.readline().strip()
-	if not line:break
-	ele=line.split('\t')
-	dkps[ele[0]]=''
-	ps=re.split(',',ele[1])
-	for e in ps:
-		dkps[ele[0]]=e # Set to 1 for Counter -> Dict Merge
-		dpsc[e]=0
-
-## Build pos-snp freq array
-
-f3=open(matrix_file,'r')
-fl=f3.readline().strip()
-pos_snp=re.split('\t',fl) # Head line arr
-#print(np.where(np.array(pos_snp)=='8946-T')[0][0])
-
-# Run jellyfish to get kmer counting result
-if read_2=='':
-	cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS.jf '+read_1
-	cmd2=file_dir+'/jellyfish-linux dump -c Tem_VS.jf > Tem_Vs.fa'
-	os.system(cmd1)
-	os.system(cmd2)
-else:
-	cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if '+snp_kmr_fa+' -o Tem_VS.jf '+read_1+' '+read_2
-	cmd2=file_dir+'/jellyfish-linux dump -c Tem_VS.jf > Tem_Vs.fa'
-	os.system(cmd1)
-	os.system(cmd2)
-	
-
-freq_arr=[]
-fnew=open('Tem_Vs.fa','r')
-while True:
-	line=fnew.readline().strip()
-	if not line:break
-	ele=line.split()
-	dpsc[dkps[ele[0]]]+=int(ele[1])
-
-carr=[]
-for p in pos_snp:
-	c=re.split('-',p)[0]
-	if c not in carr:
-		carr.append(c)
-	if p not in dpsc:
-		freq_arr.append(0)
-	else:
-		freq_arr.append(dpsc[p])
-
-freq_arr=np.array(freq_arr)
-#print(freq_arr[1397])
-
-#freq_arr[freq_arr<=min_depth_absolute]=0
-#keep=(freq_arr!=0)
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="VirStrain strain prediction script"
+    )
+    parser.add_argument("-i", "--input_reads", required=True, help="SE reads or read1")
+    parser.add_argument("-p", "--input_reads2", default="", help="PE reads read2")
+    parser.add_argument("-k", "--kmer_size", type=int, default=25, help="k-mer size")
+    parser.add_argument("-m", "--matrix_file", required=True, help="SNP-position matrix file")
+    parser.add_argument("-s", "--snp_kmer_file", required=True, help="kmer -> snp_pos file")
+    parser.add_argument("-f", "--snp_kmer_fa", required=True, help="kmer fasta")
+    parser.add_argument("-c", "--cls_file", required=True, help="cluster info file")
+    parser.add_argument("-b", "--sub_kmr_file", required=True, help="subcluster kmer file")
+    parser.add_argument("-o", "--output", required=True, help="output text report")
+    return parser.parse_args()
 
 
-### Check avg depth from the pos-snp frequency array
-keep=(freq_arr!=0)
-check_arr=freq_arr[keep]
-min_depth,max_depth=np.percentile(check_arr,[min_depth_percentile,max_depth_percentile])
-#print(min_depth)
-keep=np.logical_and.reduce((check_arr>=min_depth,check_arr<=max_depth))
-check_arr2=check_arr[keep]
-# Average depth of the frequency vector
-min_depth_adf=min_depth_rate*np.mean(check_arr2)
-##### !! freq arr filter using 2 or 0.1*avg-depth
-
-if min_depth_adf<2:
-	min_depth_adf=2 # Use 2 to test firstly
-#min_depth_adf=min_depth_absolute
-freq_arr[freq_arr<=min_depth_adf]=0
-weighted_freq_arr=freq_arr/np.sum(freq_arr)
-
-##### Filter done. ########
+def run_cmd(cmd: list[str], stdout_path: Path | None = None) -> None:
+    if stdout_path is not None:
+        with stdout_path.open("w", encoding="utf-8") as handle:
+            subprocess.run(cmd, check=True, stdout=handle)
+    else:
+        subprocess.run(cmd, check=True)
 
 
-pos_freq_map=dict(zip(pos_snp,freq_arr))
-#print(pos_freq_map['18722-C'])
-t=np.array(pos_snp)
-#sindex=np.argwhere(t=='18722-C')[0][0]
-#print(freq_arr[sindex])
-#exit()
-#print(np.where(np.array(pos_snp)=='8946-T'))
-	#ax=sns.distplot(a,norm_hist=False,kde=False)
-	#ax=sns.distplot(a,norm_hist=False,kde=False)
-#exit()
-
-#print(pos_freq_map['8946-T'])
-#exit()
-#print(pos_freq_map['4248-T'])
-#exit()
-#des={}  # Strain -> the sum of frequency vector of this strain
-ds_pos={}  # Strain -> 0 1 1 0 0 1 (pos-snp: yes or no vector)
-ds_freq={} # Strain -> frequency vector of this strain
-dmap_rate={} # Strain -> pos-snp map scpre of this strain
-#ds_avgd={}  # Strain -> average depth of this strain
-ds_num={} # Strain -> pos-snp map number, raw number
-dmr={}  # Strain -> pos-snp map rate os this strain (map_number/raw_number)
-#These 2 dict will be used to visualize the pos depth figure
-dscf={} #Strain-> 110-A:110, 111-NA:0, ..
-dscl={} # Strain-> 110-A:3000, 111-NA:0, ..
-all_ps=[] # Record the matrix array
-while True:
-	line=f3.readline().strip()
-	if not line:break
-	ele=line.split('\t')
-	#des[ele[0]]=0
-	tem=[]
-	#all_ps.append(ele[1:])
-	for e in ele[1:]:
-		tem.append(int(e))
-	tem=np.array(tem)
-	all_ps.append(tem)
-	dscf[ele[0]]={}
-	dscl[ele[0]]={}
-	'''
-	keep=(tem==1)
-	ps_number=len(tem[keep])
-	ds_num[ele[0]]=ps_number
-	'''
-	nt=freq_arr*tem # the frequency vector of this strain
-	raw_c=len(tem[tem==1])
-	map_c=len(nt[nt>0])
-	'''
-	if ele[0]=='>MT419847.1':
-		print('>MT419847.1',map_c,raw_c)
-	if ele[0]=='>MN938384.1':
-		print('>MN938384.1',map_c,raw_c)
-	'''
-	map_rate=np.sum(tem*weighted_freq_arr)
-	#map_rate=float(map_c)/float(raw_c)
-	#dmap_rate[ele[0]]=map_rate
-	dmap_rate[ele[0]]=map_rate
-	ds_num[ele[0]]=str(map_c)+'/'+str(raw_c)
-	dmr[ele[0]]=float(map_c)/float(raw_c)
-	#value=nt.sum()
-	#des[ele[0]]=value
-	ds_pos[ele[0]]=tem
-	ds_freq[ele[0]]=nt
-	## Get average depth of this strain ##
-	'''
-	keep=(nt!=0)
-	nt=nt[keep]
-	min_depth,max_depth=np.percentile(nt,[min_depth_percentile,max_depth_percentile])
-	keep=np.logical_and.reduce((nt>=min_depth,nt<=max_depth))
-	nt=nt[keep]
-	ds_avgd[ele[0]]=np.mean(nt)
-	'''
-''' Here we initialize 2 dict for later visualization. '''
-all_ps=np.array(all_ps)
-all_sum=np.sum(all_ps,axis=0)
-pos_label=dict(zip(pos_snp,list(all_sum)))
-'''
-for s in ds_freq:
-	i=0
-	for c in ds_freq[s]:
-		if c==0:
-			i+=1
-			continue
-		current_ps=pos_snp[i]	
-		column=int(re.split('-',current_ps)[0])
-		if column not in dscf[s]:
-			dscf[s][column]=0
-		if not c==0:
-			dscf[s][column]+=c
-		i+=1
-	i2=0
-	for c in ds_pos[s]:
-		if c==0:
-			i2+=1
-			continue
-		current_ps=pos_snp[i2]
-		column=int(re.split('-',current_ps)[0])
-		if column not in dscl[s]:
-			dscl[s][column]=0
-		if c==1:
-			dscl[s][column]=pos_label[current_ps]
-		i2+=1
-print(len(dscl['>gb:J02176']),len(dscf['>gb:J02176']))
-exit()
-'''
-#print(max(the_sum),len(np.argwhere(the_sum==len(all_ps_vec)-1)),len(np.argwhere(the_sum==1)))
-
-#exit()
-#index=np.where(np.array(pos_snp)=='8946-T')[0][0]
-#print(ds_pos['>MT419847.1'][index])
-#print(ds_pos['>MN938384.1'][index])
-max_map=sorted(dmr.items(),key=lambda d:d[1],reverse=True)[0][1]
-#exit()
-res=sorted(dmap_rate.items(),key=lambda d:d[1],reverse=True)
-top10_score_s=res[:10]
-#exit()
-top_map_strain=[]
-for r in res:
-	if r[1]==res[0][1]:
-		top_map_strain.append(r[0])
-	else:break
-#####  Unique nodes scan for all top strains
-snp_arr=[]
-### Pre-calculate the possible strain number, then decide whether should calculate weighted score.
-pre_freq_arr=[]
-#strain_num={}
-for s in top_map_strain:
-	snp_arr.append(ds_pos[s])
-	pre_pa=ds_pos[s]*(-1)
-	pre_pa=np.array(pre_pa)
-	pre_pa[pre_pa==0]=1
-	pre_freq_arr=freq_arr*pre_pa
-	pre_freq_arr[pre_freq_arr<0]=0
-
-keep=(pre_freq_arr!=0)
-pre_freq_arr=pre_freq_arr[keep]
-
-pre_pos_snp=np.array(pos_snp)[keep]
-pre_ds_pos={}
-for s in ds_pos:
-	pre_ds_pos[s]=ds_pos[s][keep]
-pre_wf_arr=pre_freq_arr/np.sum(pre_freq_arr)
-strain_num={}
-sn=0
-#print(pre_freq_arr)
-#exit()
-while True:
-	if len(pre_freq_arr)==0:break
-	smr={}
-	for r in ds_pos:
-		if r in top_map_strain:continue
-		tt=pre_ds_pos[r]
-		nt=tt*pre_wf_arr
-		#mc=len(nt[nt>0])
-		mr=np.sum(nt)
-		smr[r]=mr
-	res=sorted(smr.items(),key=lambda d:d[1],reverse=True)
-	ts=[]
-	for r in res:
-		if r[1]==res[0][1]:
-			ts.append(r[0])
-	if len(ts)>1:
-		rmr={}
-		for s in ts:
-			rmr[s]=dmap_rate[s]
-		res2=sorted(rmr.items(),key=lambda d:d[1],reverse=True)
-		#for r in res2:
-		strain_num[res2[0][0]]=''
-	else:
-		strain_num[ts[0]]=''
-	#strain_num[res[0][0]]=''
-	vm1=len(pre_freq_arr)
-	pre_pa=pre_ds_pos[ts[0]]*(-1)
-	pre_pa[pre_pa==0]=1
-	pre_freq_arr=pre_freq_arr*pre_pa
-	pre_freq_arr[pre_freq_arr<0]=0
-	keep=(pre_freq_arr!=0)
-	pre_freq_arr=pre_freq_arr[keep]
-	if not np.sum(pre_freq_arr)==0:
-		pre_wf_arr=pre_freq_arr/np.sum(pre_freq_arr)
-	pre_pos_snp=pre_pos_snp[keep]
-	for s in pre_ds_pos:
-		pre_ds_pos[s]=pre_ds_pos[s][keep]
-	vm=vm1-len(pre_freq_arr)
-	if vm>1:
-		#strain_num[res[0][0]]=''
-		sn+=1
-# Will recalculate the score and select top strain
-if sn>1:
-	#nw=len(strain_num)
-	for s in top_map_strain:
-		strain_num[s]=''
-	sscore={}
-	sna=[]
-	for s in strain_num:
-		sna.append(ds_pos[s])
-	sna=np.array(sna)
-	ssum=sna.sum(axis=0)
-	ssum[ssum==0]=1
-	for s in strain_num:
-		snt=ds_pos[s]/ssum
-		ns=dmap_rate[s]*snt
-		ns=ns.sum(axis=0)
-		sscore[s]=ns
-	res=sorted(sscore.items(),key=lambda d:d[1],reverse=True)
-	tem_map_strain=[]
-	for r in res:
-		if not dmr[r[0]]==max_map:continue
-		tem_map_strain.append(r[0])
-		break
-	if len(tem_map_strain)>0:
-		top_map_strain=tem_map_strain
-	#print(sscore)
-
-	
-snp_arr=np.array(snp_arr)
-pos_sum=snp_arr.sum(axis=0)
-pos_sum[pos_sum>1]=0
-i=0
-
-strain_unique={}
-strain_unique_count={}
-for p in pos_sum:
-	column=pos_snp[i]
-	#i+=1
-	if p==1:
-		if pos_freq_map[column]<=min_depth_absolute:
-			i+=1
-			continue
-		i2=0
-		window=snp_arr[:,i]
-		for w in window:
-			if w==1:
-				strain=top_map_strain[i2]
-				if strain not in strain_unique:
-					strain_unique[strain]={column:pos_freq_map[column]}
-					strain_unique_count[strain]=1
-				else:
-					strain_unique[strain][column]=pos_freq_map[column]
-					strain_unique_count[strain]+=1
-			i2+=1
-	i+=1
-#print(freq_arr[1397])
-#print(pos_freq_map['4248-T'])
-#print(strain_unique)
-#exit()
-## Final output generate part ####
-mp_strain=[]  # Most possible strain
-op_strain=[]  # Other possible strain -> [S1,S2,S3,S5]
-op_strain_batch=[] # Other possible strain ->[[S1,S2],[S3,S5],...]
-#op_pos_snp=[] # Other possible pos-snp
-#op_ps_strain=[] # The top map rate strain of other possible pos-snp
-if not len(strain_unique)==0:
-	#print(strain_unique)
-	for s in strain_unique:
-		mp_strain.append(s)
-		#print(s,ds_avgd[s])
-		#exit()
-else:
-	### Need to check whether these strains have close depth
-	#d={}
-	#strain_depth=[]
-	for r in top_map_strain:
-		mp_strain.append(r)
-		#d[r]=ds_avgd[r]
-		#raw_depth=ds_freq[r] # the freq arr of this strain -> [0, 22, 0 ...]
-		#keep=(raw_depth>0)
-		#nz_depth=raw_depth[keep]
-		#print(np.mean(nz_depth))
-		#exit()
-	#exit()
-	'''
-	res2=sorted(d.items(),key=lambda d:d[1],reverse=True)
-	for r in res2:
-		mp_strain.append(r[0])
-	'''
-#print(strain_unique)
-#exit()
-#print(top_map_strain)
-#for t in top_map_strain:
-#print(t,dmap_rate[t])
-## Check nodes of MT419847
-## Iterative function to get other possible strains and other possible pos-snp
-#print('Raw freq arr: ', freq_arr[sindex])
-ds_avgd={}
-ds_medd={}
-for m in mp_strain:
-	'''
-	keep=(ds_freq[m]!=0)
-	check_arr=ds_freq[m][keep]
-	min_depth,max_depth=np.percentile(check_arr,[min_depth_percentile,max_depth_percentile])
-	kp1=(check_arr<=min_depth)
-	check_arr=check_arr[kp1]
-	continue
-	print(m,ds_freq[m][sindex])
-	'''
-	# Get the avg depth of the strain
-	keep=(ds_freq[m]!=0)
-	min_depth,max_depth=np.percentile(ds_freq[m][keep],[min_depth_percentile,max_depth_percentile])
-	keep=np.logical_and.reduce((ds_freq[m]>=min_depth,ds_freq[m]<=max_depth))
-	ds_avgd[m]=np.mean(ds_freq[m][keep])
-	ds_medd[m]=np.median(ds_freq[m][keep])
-
-	pos_arr=ds_pos[m]*(-1)
-	pos_arr=np.array(pos_arr)
-	pos_arr[pos_arr==0]=1
-	freq_arr=freq_arr*pos_arr
-	freq_arr[freq_arr<0]=0
-
-keep=(freq_arr!=0)
-
-left_freq_arr=freq_arr[keep]
-#print('Filtered freq arr: ',left_freq_arr[sindex])
-#exit()
-pos_snp=np.array(pos_snp)
-left_pos_snp=pos_snp[keep]
-left_ds_pos={}
-for s in ds_pos:
-	left_ds_pos[s]=ds_pos[s][keep]
-#print(left_freq_arr)
-#print(left_pos_snp)
-#exit()
-#run=0
-left_ps_freq_map=dict(zip(left_pos_snp,left_freq_arr))
-#print(left_ps_freq_map)
-#exit()
-resl=sorted(left_ps_freq_map.items(),key=lambda d:d[1],reverse=True)
-os_strain={} # '221-A-100-10000':['>MT312312.1',....]
-os_arr=[] # ['221-A-100-10000','225-G-100-10000',....]
-left_weighted_freq_arr=left_freq_arr/np.sum(left_freq_arr)
-#print(left_ps_freq_map)
-#print(left_freq_arr,left_pos_snp)
-#exit()
-#run=0
-vmap={} # The dict used to record the valid map rate
-#### Start Iterative process ######
-if not len(left_freq_arr)==0:
-	max_iter_times=len(left_freq_arr)
-	for l in range(max_iter_times):
-		#temd=dict(zip(left_pos_snp,left_freq_arr))
-		#res=sorted(temd.items(),key=lambda d:d[1],reverse=True)
-		#for r in res:
-		if len(left_freq_arr)==0:break
-		#column_snp=res[0][0]
-		strain_map_rate={}
-		for r in ds_pos:
-			if r in mp_strain:continue
-			#if r in op_strain:continue
-			#if r in op_ps_strain:continue
-			tem=left_ds_pos[r]
-			nt=tem*left_weighted_freq_arr
-			#raw_c=len(tem[tem==1])
-			map_c=len(nt[nt>0])
-			#map_rate=map_c
-			map_rate=np.sum(nt)
-			strain_map_rate[r]=map_rate
-		selected_strain=[] # used to save the selected strains in this round
-		res=sorted(strain_map_rate.items(),key=lambda d:d[1],reverse=True)
-		#print(res)
-		#exit()
-		top_s=[]
-		snp_arr=[]
-
-		for r in res:
-			if r[1]==res[0][1]:
-				top_s.append(r[0])
-				### Calculate avg depth
-				nt=left_ds_pos[r[0]]*left_freq_arr
-				keep=(nt!=0)
-				nt=nt[keep]
-				min_depth,max_depth=np.percentile(nt,[min_depth_percentile,max_depth_percentile])
-				keep=np.logical_and.reduce((nt>=min_depth,nt<=max_depth))
-				if not len(nt[keep])==0:
-					nt=nt[keep]
-				ds_avgd[r[0]]=np.mean(nt)
-				ds_medd[r[0]]=np.median(nt)
-				## Done
-				snp_arr.append(left_ds_pos[r[0]])
-		#print(top_s)
-		#exit()
-		if len(top_s)>1:
-			rank_map_rate={}
-			for s in top_s:
-				rank_map_rate[s]=dmap_rate[s]
-			res=sorted(rank_map_rate.items(),key=lambda d:d[1],reverse=True)
-			top_s=[]
-			for r in res:
-				top_s.append(r[0])
-		top_s=np.array(top_s)
-		pre=[]
-		for r in resl:
-			pre.append(r[0]+':'+str(r[1]))
-		pre=','.join(pre)
-		top_pos_snp=pre+'\t'+str(len(top_s))
-		os_arr.append(top_pos_snp)
-		os_strain[top_pos_snp]=[]
-		for s in top_s:
-			os_strain[top_pos_snp].append(s)
-			pos_arr=left_ds_pos[s]*(-1)
-			pos_arr[pos_arr==0]=1
-			left_freq_arr=left_freq_arr*pos_arr
-			left_freq_arr[left_freq_arr<0]=0
-		keep=(left_freq_arr!=0)
-		valid_map=len(left_freq_arr)
-		left_freq_arr=left_freq_arr[keep]
-		valid_map=valid_map-len(left_freq_arr)
-		vmap[top_pos_snp]=valid_map
-		if not np.sum(left_freq_arr)==0:
-			left_weighted_freq_arr=left_freq_arr/np.sum(left_freq_arr)
-		left_pos_snp=left_pos_snp[keep]
-		left_ps_freq_map=dict(zip(left_pos_snp,left_freq_arr))
-		for s in left_ds_pos:
-			left_ds_pos[s]=left_ds_pos[s][keep]
-		resl=sorted(left_ps_freq_map.items(),key=lambda d:d[1],reverse=True)
-
-# All strain cross validation
-
-### Output part
-'''
-fp=open('../head_file.txt','r')
-dc={}
-while True:
-	line=fp.readline().strip()
-	if not line:break
-	pre=re.split('\|',line)[0].strip()
-	anno=re.split('\|',line)[1].strip()
-	#t=re.split('/',line)
-	if len(t)<3:
-		dc[pre]='NA'
-	else:
-	#country=re.split('/',line)[2]
-	#if re.search('2020',country):
-	#country='NA'
-	dc[pre]=anno
-'''
-o=open(out_dir,'w+')
-o.write('\t\tStrain_ID\tCls_info\tSubCls_info\tMap_Score\tValid_Map_Rate\tTotal_Map_Rate\tStrain_Depth\tStrain_info\tUnique_SNP\n')
-o.write('>>Most possible strains:\n')
-all_s=[]
-vs_sd=[]
-vs_so=[]
-for s in mp_strain:
-	all_s.append(s)
-	vs_sd.append(s)
-if len(os_arr)>0:
-	for s in os_arr:
-		all_s.append(os_strain[s][0])
-		if vmap[s]>1:
-			vs_so.append(os_strain[s][0])
-# Strain-level identification 
-s2cls={} # Used for output cluster info
-s2sub={} # Used for output sub-cluster info
-candidate_cls={}
-fcls=open(cls_file)
-while True:
-	line=fcls.readline().strip()
-	if not line:break
-	ele=line.split('\t')
-	if ele[0] not in all_s:
-		s2cls[ele[0]]=ele[2]
-		continue
-	if ele[2]==ele[3]:
-		s2cls[ele[0]]=ele[2]
-		s2sub[ele[0]]='NA'
-	else:
-		s2cls[ele[0]]=ele[2]
-		candidate_cls[ele[2]]=''
-		#s2sub[ele[0]]=''
-if not len(candidate_cls)==0:
-	fsk=open(sub_kmr_file,'r')
-	ksub={}
-	cls_sub={}
-	#subcount={}
-	while True:
-		line=fsk.readline().strip()
-		if not line:break
-		ele=line.split('\t')
-		kmr=ele[0]
-		if ele[1] in candidate_cls:
-			if kmr not in ksub:
-				ksub[kmr]={ele[1]:{}}
-			if ele[1] not in ksub[kmr]:
-				ksub[kmr][ele[1]]={}
-			if ele[1] not in cls_sub:
-				cls_sub[ele[1]]={}
-			sub=re.split(',',ele[-1])
-			for s in sub:
-				ksub[kmr][ele[1]][s]=''
-				cls_sub[ele[1]][s]=0
-	ok=open('Tem_Vs2Sub.fa','w+')
-	co=1
-	for kmr in ksub:
-		ok.write('>'+str(co)+'\n')
-		ok.write(kmr+'\n')
-		co+=1
-	ok.close()
-	if read_2=='':
-		cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if Tem_Vs2Sub.fa -o Tem_VS2.jf '+read_1
-	else:
-		cmd1=file_dir+'/jellyfish-linux count -m 25 -s 100M -t 8 --if Tem_Vs2Sub.fa -o Tem_VS2.jf '+read_1+' '+read_2
-	cmd2=file_dir+'/jellyfish-linux dump -c Tem_VS2.jf > Tem_Vs2.fa'
-	os.system(cmd1)
-	os.system(cmd2)
-	ft2=open('Tem_Vs2.fa','r')
-	while True:
-		line=ft2.readline().strip()
-		if not line:break
-		ele=line.split()
-		if int(ele[1])>=min_depth_adf:
-			for c in ksub[ele[0]]:
-				for c2 in ksub[ele[0]][c]:
-					cls_sub[c][c2]+=int(ele[1])
-	for s in all_s:
-		if s in s2sub:continue
-		if s2cls[s] not in cls_sub:
-			s2sub[s]='NA'
-		else:
-			res=sorted(cls_sub[s2cls[s]].items(),key=lambda d:d[1],reverse=True)
-			if res[0][1]==res[1][1]:
-				s2sub[s]='NA'
-			else:
-				s2sub[s]=res[0][0]
+def load_kmer_to_snp(snp_kmr_file: Path) -> tuple[dict[str, str], dict[str, int]]:
+    dkps: dict[str, str] = {}
+    dpsc: dict[str, int] = {}
+    with snp_kmr_file.open("r", encoding="utf-8") as f1:
+        for raw_line in f1:
+            line = raw_line.strip()
+            if not line:
+                continue
+            ele = line.split("\t")
+            dkps[ele[0]] = ""
+            ps = ele[1].split(",")
+            for e in ps:
+                dkps[ele[0]] = e
+                dpsc[e] = 0
+    return dkps, dpsc
 
 
-for s in mp_strain:
-	#keep=(ds_pos[s]==1)
-	#all_s.append(s)
-	if s in strain_unique:
-		o.write('\t\t'+s+'\t'+s2cls[s]+'\t'+s2sub[s]+'\t'+str(dmap_rate[s])+'\t'+str(ds_num[s])+'\t'+str(ds_num[s])+'\t'+str(ds_avgd[s])+','+str(ds_medd[s])+'\t\t\t'+str(strain_unique[s])+'\n')
-	else:
-		o.write('\t\t'+s+'\t'+s2cls[s]+'\t'+s2sub[s]+'\t'+str(dmap_rate[s])+'\t'+str(ds_num[s])+'\t'+str(ds_num[s])+'\t'+str(ds_avgd[s])+','+str(ds_medd[s])+'\t\t\tNA\n')
-o.write('>>Other possible strains:\n')
-if len(os_arr)>0:
-	#i=1
-	for s in os_arr:
-		ele=re.split('\t',s)
-		if vmap[s]==1:
-			o.write('\t>>(Could be FP)'+ele[0]+',Genome_num: '+ele[1]+'\n')
-		else:
-			o.write('\t>>'+ele[0]+',Genome_num: '+ele[1]+'\n')
-		all_s.append(os_strain[s][0])
-		for n in os_strain[s]:
-			#all_s.append(n)
-			a=re.split('/',ds_num[n])[-1]
-			vm=str(vmap[s])+'/'+a
-			if n in s2sub:
-				o.write('\t\t'+n+'\t'+s2cls[n]+'\t'+s2sub[n]+'\t'+str(dmap_rate[n])+'\t'+vm+'\t'+ds_num[n]+'\t'+str(ds_avgd[n])+','+str(ds_medd[n])+'\t\t\tNot_record\n')
-			else:
-				o.write('\t\t'+n+'\t'+s2cls[n]+'\tNot_record\t'+str(dmap_rate[n])+'\t'+vm+'\t'+ds_num[n]+'\t'+str(ds_avgd[n])+','+str(ds_medd[n])+'\t\t\tNot_record\n')
-				
-		#outs='\t'.join(os_strain[s])
-		#o.write('\t\t\t'+outs+'\n')
-		#i+=1
-else:
-	o.write('\tCan not detect other strains.\n')
-res=sorted(dmr.items(),key=lambda d:d[1],reverse=True)
-o.write('\n>>Highest_Map_Strains (Could be FP):\n')
-final={}
-for r in res:
-	if r[1]==res[0][1]:
-		if r[0] not in all_s:
-			final[r[0]]=dmap_rate[r[0]]
-if not len(final)==0:
-	res=sorted(final.items(),key=lambda d:d[1],reverse=True)
-	for s in res:
-		if s[0] in s2sub:
-			o.write('\t\t'+s[0]+'\t'+s2cls[s[0]]+'\t'+s2sub[s[0]]+'\t'+str(dmap_rate[s[0]])+'\t'+ds_num[s[0]]+'\t'+ds_num[s[0]]+'\tNA\tNA\n')
-		else:
-			o.write('\t\t'+s[0]+'\t'+s2cls[s[0]]+'\tNot_record\t'+str(dmap_rate[s[0]])+'\t'+ds_num[s[0]]+'\t'+ds_num[s[0]]+'\tNA\tNA\n')
-o.write('>>Top10_Score_Strains:\n')
-for t in top10_score_s:
-	if t[0] in s2sub:
-		o.write('\t\t'+t[0]+'\t'+s2cls[t[0]]+'\t'+s2sub[t[0]]+'\t'+str(t[1])+'\t'+ds_num[t[0]]+'\t'+ds_num[t[0]]+'\tNA\tNA\n')
-	else:
-		o.write('\t\t'+t[0]+'\t'+s2cls[t[0]]+'\tNot_record\t'+str(t[1])+'\t'+ds_num[t[0]]+'\t'+ds_num[t[0]]+'\tNA\tNA\n')
-## Remove tem file 
-os.system('rm Tem_Vs* Tem_VS*')
-## From this line, we will generate strain-level analysis report
-print('Txt report is done. Now will generate pdf report!')
+def load_matrix_header(matrix_file: Path) -> tuple[list[str], list[str]]:
+    with matrix_file.open("r", encoding="utf-8") as f3:
+        header = f3.readline().strip()
+    pos_snp = header.split("\t")
+    carr: list[str] = []
+    for p in pos_snp:
+        c = p.split("-")[0]
+        if c not in carr:
+            carr.append(c)
+    return pos_snp, carr
 
-vs_so=vs_so[:5]
-for s in ds_freq:
-	check=0
-	if s  in vs_sd:
-		check=1
-	if s in vs_so:
-		check=2
-	if check==0:continue
-	i=0
-	for c in ds_freq[s]:
-		if c==0:
-			i+=1
-			continue
-		current_ps=pos_snp[i]
-		column=int(re.split('-',current_ps)[0])
-		if column not in dscf[s]:
-			dscf[s][column]=c
-		
-		i+=1
-	i2=0
-	for c in ds_pos[s]:
-		if c==0:
-			i2+=1
-			continue
-		current_ps=pos_snp[i2]
-		column=int(re.split('-',current_ps)[0])
-		if column not in dscl[s]:
-			dscl[s][column]=0
-		if c==1:
-			dscl[s][column]=pos_label[current_ps]
-		i2+=1
 
-ov1=open('Mps_ps_depth_SCOV2.csv','w+')
-ov2=open('Ops_ps_depth_SCOV2.csv','w+')
-ov1.write('ID,Column_ID')
-#carr=[]
-for s in vs_sd:
-	ov1.write(','+s+'_Freq')
-	ov1.write(','+s+'_LNum')
-ov1.write('\n')
-#carr=sorted(list(dscf[vs_sd[0]].keys()))
-carr=[]
-for c in pos_snp:
-	c=re.split('-',c)[0]
-	if int(c) not in carr:
-		carr.append(int(c))
+def count_kmers(
+    file_dir: Path,
+    snp_kmr_fa: Path,
+    read_1: Path,
+    read_2: Path | None,
+    jf_file: Path,
+    fa_file: Path,
+    k: int,
+) -> None:
+    jellyfish_bin = file_dir / "jellyfish-linux"
+    count_cmd = [
+        str(jellyfish_bin),
+        "count",
+        "-m",
+        str(k),
+        "-s",
+        "100M",
+        "-t",
+        "8",
+        "--if",
+        str(snp_kmr_fa),
+        "-o",
+        str(jf_file),
+        str(read_1),
+    ]
+    if read_2 is not None:
+        count_cmd.append(str(read_2))
+    run_cmd(count_cmd)
+    run_cmd([str(jellyfish_bin), "dump", "-c", str(jf_file)], stdout_path=fa_file)
 
-i=1
-for c in carr:
-	ov1.write(str(i)+','+str(c))
-	check=0
-	check1=0
-	check2=0
-	for s in vs_sd:
-		if c not in dscf[s]:
-			check+=1
-			check1=1
-		if c not in dscl[s]:
-			check+=1
-			check2=1
-		if check==0:
-			ov1.write(','+str(dscf[s][c])+','+str(dscl[s][c]))
-		elif check==1:
-			if check1==1:
-				ov1.write(',0,'+str(dscl[s][c]))	
-			if check2==1:
-				ov2.write(','+str(dscf[s][c])+',0')	
-		elif check==2:
-			ov2.write(',0,0')	
-	ov1.write('\n')
-	i+=1
-	
-	
 
-ov2.write('ID,Column_ID')
-if len(vs_so)==0:
-	ov2.write(',None,None\n')
-else:
-	for s in vs_so:
-		ov2.write(','+s+'_Freq')
-		ov2.write(','+s+'_LNum')
-	ov2.write('\n')
-	i=1
-	for c in carr:
-		ov2.write(str(i)+','+str(c))
-		check=0
-		check1=0
-		check2=0
-		for s in vs_so:
-			if s not in dscf or s not in dscl:
-				print('Warning: ',s,' not in final dict!')
-				continue
-			if c not in dscf[s]:
-				check+=1
-				check1=1
-			if c not in dscl[s]:
-				check+=1
-				check2=1
-			if check==0:
-				ov2.write(','+str(dscf[s][c])+','+str(dscl[s][c]))
-			elif check==1:
-				if check1==1:
-					ov2.write(',0,'+str(dscl[s][c]))
-				if check2==1:
-					ov2.write(','+str(dscf[s][c])+',0')
-			else:
-				ov2.write(',0,0')
-		ov2.write('\n')
-		i+=1
+def update_dpsc_from_dump(fa_file: Path, dkps: dict[str, str], dpsc: dict[str, int]) -> None:
+    with fa_file.open("r", encoding="utf-8") as fnew:
+        for raw_line in fnew:
+            line = raw_line.strip()
+            if not line:
+                continue
+            ele = line.split()
+            if len(ele) < 2:
+                continue
+            kmer = ele[0]
+            if kmer in dkps:
+                dpsc[dkps[kmer]] += int(ele[1])
+
+
+def safe_percentile_bounds(arr: np.ndarray, low: float, high: float) -> tuple[float, float]:
+    if arr.size == 0:
+        return 0.0, 0.0
+    return tuple(np.percentile(arr, [low, high]))  # type: ignore[return-value]
+
+
+def build_freq_arr(pos_snp: list[str], dpsc: dict[str, int]) -> np.ndarray:
+    freq_arr = [dpsc.get(p, 0) for p in pos_snp]
+    return np.array(freq_arr, dtype=float)
+
+
+def compute_filtered_freq(freq_arr: np.ndarray) -> tuple[np.ndarray, float]:
+    min_depth_percentile = 10
+    max_depth_percentile = 90
+    min_depth_absolute = 2
+    min_depth_rate = 0.05
+
+    keep = freq_arr != 0
+    check_arr = freq_arr[keep]
+
+    if check_arr.size == 0:
+        return freq_arr.copy(), float(min_depth_absolute)
+
+    min_depth, max_depth = safe_percentile_bounds(
+        check_arr, min_depth_percentile, max_depth_percentile
+    )
+    keep2 = np.logical_and.reduce((check_arr >= min_depth, check_arr <= max_depth))
+    check_arr2 = check_arr[keep2]
+
+    if check_arr2.size == 0:
+        min_depth_adf = float(min_depth_absolute)
+    else:
+        min_depth_adf = min_depth_rate * float(np.mean(check_arr2))
+        if min_depth_adf < min_depth_absolute:
+            min_depth_adf = float(min_depth_absolute)
+
+    new_freq = freq_arr.copy()
+    new_freq[new_freq <= min_depth_adf] = 0
+    return new_freq, min_depth_adf
+
+
+def load_strain_matrix(
+    matrix_file: Path,
+    freq_arr: np.ndarray,
+    weighted_freq_arr: np.ndarray,
+) -> tuple[
+    dict[str, np.ndarray],
+    dict[str, np.ndarray],
+    dict[str, float],
+    dict[str, str],
+    dict[str, float],
+    dict[str, dict[int, float]],
+    dict[str, dict[int, int]],
+    np.ndarray,
+]:
+    ds_pos: dict[str, np.ndarray] = {}
+    ds_freq: dict[str, np.ndarray] = {}
+    dmap_rate: dict[str, float] = {}
+    ds_num: dict[str, str] = {}
+    dmr: dict[str, float] = {}
+    dscf: dict[str, dict[int, float]] = {}
+    dscl: dict[str, dict[int, int]] = {}
+    all_ps: list[np.ndarray] = []
+
+    with matrix_file.open("r", encoding="utf-8") as f3:
+        _ = f3.readline()
+        for raw_line in f3:
+            line = raw_line.strip()
+            if not line:
+                continue
+            ele = line.split("\t")
+            tem = np.array([int(e) for e in ele[1:]], dtype=int)
+            all_ps.append(tem)
+            dscf[ele[0]] = {}
+            dscl[ele[0]] = {}
+
+            nt = freq_arr * tem
+            raw_c = len(tem[tem == 1])
+            map_c = len(nt[nt > 0])
+            map_rate = float(np.sum(tem * weighted_freq_arr)) if weighted_freq_arr.size > 0 else 0.0
+
+            dmap_rate[ele[0]] = map_rate
+            ds_num[ele[0]] = f"{map_c}/{raw_c}" if raw_c > 0 else "0/0"
+            dmr[ele[0]] = float(map_c) / float(raw_c) if raw_c > 0 else 0.0
+            ds_pos[ele[0]] = tem
+            ds_freq[ele[0]] = nt
+
+    return ds_pos, ds_freq, dmap_rate, ds_num, dmr, dscf, dscl, np.array(all_ps)
+
+
+def compute_top_map_strains(
+    dmr: dict[str, float],
+    dmap_rate: dict[str, float],
+) -> tuple[list[str], list[tuple[str, float]]]:
+    res = sorted(dmap_rate.items(), key=lambda d: d[1], reverse=True)
+    top10_score_s = res[:10]
+    if not res:
+        return [], top10_score_s
+    top_map_strain: list[str] = []
+    for r in res:
+        if r[1] == res[0][1]:
+            top_map_strain.append(r[0])
+        else:
+            break
+    return top_map_strain, top10_score_s
+
+
+def resolve_top_map_ties(
+    top_map_strain: list[str],
+    ds_pos: dict[str, np.ndarray],
+    freq_arr: np.ndarray,
+    pos_snp: list[str],
+    dmap_rate: dict[str, float],
+    dmr: dict[str, float],
+) -> list[str]:
+    if not top_map_strain:
+        return top_map_strain
+
+    snp_arr = [ds_pos[s] for s in top_map_strain]
+    pre_freq_arr = np.array([], dtype=float)
+
+    for s in top_map_strain:
+        pre_pa = ds_pos[s] * (-1)
+        pre_pa = np.array(pre_pa, dtype=float)
+        pre_pa[pre_pa == 0] = 1
+        pre_freq_arr = freq_arr * pre_pa
+        pre_freq_arr[pre_freq_arr < 0] = 0
+
+    keep = pre_freq_arr != 0
+    pre_freq_arr = pre_freq_arr[keep]
+    pre_pos_snp = np.array(pos_snp)[keep]
+    pre_ds_pos = {s: ds_pos[s][keep] for s in ds_pos}
+
+    if pre_freq_arr.size == 0:
+        return top_map_strain
+
+    pre_wf_arr = pre_freq_arr / np.sum(pre_freq_arr)
+    strain_num: dict[str, str] = {}
+    sn = 0
+
+    while True:
+        if len(pre_freq_arr) == 0:
+            break
+        smr: dict[str, float] = {}
+        for r in ds_pos:
+            if r in top_map_strain:
+                continue
+            tt = pre_ds_pos[r]
+            nt = tt * pre_wf_arr
+            mr = float(np.sum(nt))
+            smr[r] = mr
+
+        if not smr:
+            break
+
+        res = sorted(smr.items(), key=lambda d: d[1], reverse=True)
+        ts: list[str] = []
+        for r in res:
+            if r[1] == res[0][1]:
+                ts.append(r[0])
+
+        if not ts:
+            break
+
+        if len(ts) > 1:
+            rmr = {s: dmap_rate[s] for s in ts}
+            res2 = sorted(rmr.items(), key=lambda d: d[1], reverse=True)
+            strain_num[res2[0][0]] = ""
+            chosen = res2[0][0]
+        else:
+            strain_num[ts[0]] = ""
+            chosen = ts[0]
+
+        vm1 = len(pre_freq_arr)
+        pre_pa = pre_ds_pos[chosen] * (-1)
+        pre_pa[pre_pa == 0] = 1
+        pre_freq_arr = pre_freq_arr * pre_pa
+        pre_freq_arr[pre_freq_arr < 0] = 0
+        keep = pre_freq_arr != 0
+        pre_freq_arr = pre_freq_arr[keep]
+
+        if np.sum(pre_freq_arr) != 0:
+            pre_wf_arr = pre_freq_arr / np.sum(pre_freq_arr)
+        pre_pos_snp = pre_pos_snp[keep]
+        for s in pre_ds_pos:
+            pre_ds_pos[s] = pre_ds_pos[s][keep]
+
+        vm = vm1 - len(pre_freq_arr)
+        if vm > 1:
+            sn += 1
+
+    if sn > 1:
+        for s in top_map_strain:
+            strain_num[s] = ""
+        sscore: dict[str, float] = {}
+        sna = np.array([ds_pos[s] for s in strain_num], dtype=float)
+        if sna.size == 0:
+            return top_map_strain
+        ssum = sna.sum(axis=0)
+        ssum[ssum == 0] = 1
+        for s in strain_num:
+            snt = ds_pos[s] / ssum
+            ns = dmap_rate[s] * snt
+            sscore[s] = float(ns.sum(axis=0))
+        res = sorted(sscore.items(), key=lambda d: d[1], reverse=True)
+        max_map = sorted(dmr.items(), key=lambda d: d[1], reverse=True)[0][1]
+        tem_map_strain: list[str] = []
+        for r in res:
+            if dmr[r[0]] != max_map:
+                continue
+            tem_map_strain.append(r[0])
+            break
+        if len(tem_map_strain) > 0:
+            top_map_strain = tem_map_strain
+
+    return top_map_strain
+
+
+def collect_unique_snps(
+    top_map_strain: list[str],
+    ds_pos: dict[str, np.ndarray],
+    pos_snp: list[str],
+    pos_freq_map: dict[str, float],
+    min_depth_absolute: int = 2,
+) -> tuple[dict[str, dict[str, float]], dict[str, int]]:
+    if not top_map_strain:
+        return {}, {}
+
+    snp_arr = np.array([ds_pos[s] for s in top_map_strain], dtype=int)
+    pos_sum = snp_arr.sum(axis=0)
+    pos_sum[pos_sum > 1] = 0
+
+    strain_unique: dict[str, dict[str, float]] = {}
+    strain_unique_count: dict[str, int] = {}
+
+    for i, p in enumerate(pos_sum):
+        column = pos_snp[i]
+        if p == 1:
+            if pos_freq_map[column] <= min_depth_absolute:
+                continue
+            window = snp_arr[:, i]
+            for i2, w in enumerate(window):
+                if w == 1:
+                    strain = top_map_strain[i2]
+                    if strain not in strain_unique:
+                        strain_unique[strain] = {column: pos_freq_map[column]}
+                        strain_unique_count[strain] = 1
+                    else:
+                        strain_unique[strain][column] = pos_freq_map[column]
+                        strain_unique_count[strain] += 1
+
+    return strain_unique, strain_unique_count
+
+
+def compute_depth_stats(
+    mp_strain: list[str],
+    ds_freq: dict[str, np.ndarray],
+    ds_pos: dict[str, np.ndarray],
+    freq_arr: np.ndarray,
+    min_depth_percentile: int = 10,
+    max_depth_percentile: int = 90,
+) -> tuple[dict[str, float], dict[str, float], np.ndarray]:
+    ds_avgd: dict[str, float] = {}
+    ds_medd: dict[str, float] = {}
+    new_freq_arr = freq_arr.copy()
+
+    for m in mp_strain:
+        keep = ds_freq[m] != 0
+        vals = ds_freq[m][keep]
+        if vals.size == 0:
+            ds_avgd[m] = 0.0
+            ds_medd[m] = 0.0
+        else:
+            min_depth, max_depth = safe_percentile_bounds(vals, min_depth_percentile, max_depth_percentile)
+            keep2 = np.logical_and.reduce((ds_freq[m] >= min_depth, ds_freq[m] <= max_depth))
+            filtered = ds_freq[m][keep2]
+            if filtered.size == 0:
+                ds_avgd[m] = 0.0
+                ds_medd[m] = 0.0
+            else:
+                ds_avgd[m] = float(np.mean(filtered))
+                ds_medd[m] = float(np.median(filtered))
+
+        pos_arr = ds_pos[m] * (-1)
+        pos_arr = np.array(pos_arr, dtype=float)
+        pos_arr[pos_arr == 0] = 1
+        new_freq_arr = new_freq_arr * pos_arr
+        new_freq_arr[new_freq_arr < 0] = 0
+
+    return ds_avgd, ds_medd, new_freq_arr
+
+
+def compute_other_possible_strains(
+    mp_strain: list[str],
+    ds_pos: dict[str, np.ndarray],
+    ds_freq: dict[str, np.ndarray],
+    dmap_rate: dict[str, float],
+    freq_arr: np.ndarray,
+    pos_snp: list[str],
+    ds_avgd: dict[str, float],
+    ds_medd: dict[str, float],
+    min_depth_percentile: int = 10,
+    max_depth_percentile: int = 90,
+) -> tuple[dict[str, list[str]], list[str], dict[str, int], dict[str, float], dict[str, float]]:
+    keep = freq_arr != 0
+    left_freq_arr = freq_arr[keep]
+    pos_snp_np = np.array(pos_snp)
+    left_pos_snp = pos_snp_np[keep]
+    left_ds_pos = {s: ds_pos[s][keep] for s in ds_pos}
+    left_ps_freq_map = dict(zip(left_pos_snp, left_freq_arr))
+
+    if left_freq_arr.size == 0:
+        return {}, [], {}, ds_avgd, ds_medd
+
+    resl = sorted(left_ps_freq_map.items(), key=lambda d: d[1], reverse=True)
+    os_strain: dict[str, list[str]] = {}
+    os_arr: list[str] = []
+    left_weighted_freq_arr = left_freq_arr / np.sum(left_freq_arr)
+    vmap: dict[str, int] = {}
+
+    max_iter_times = len(left_freq_arr)
+    for _ in range(max_iter_times):
+        if len(left_freq_arr) == 0:
+            break
+
+        strain_map_rate: dict[str, float] = {}
+        for r in ds_pos:
+            if r in mp_strain:
+                continue
+            tem = left_ds_pos[r]
+            nt = tem * left_weighted_freq_arr
+            map_rate = float(np.sum(nt))
+            strain_map_rate[r] = map_rate
+
+        if not strain_map_rate:
+            break
+
+        res = sorted(strain_map_rate.items(), key=lambda d: d[1], reverse=True)
+        top_s: list[str] = []
+
+        for r in res:
+            if r[1] == res[0][1]:
+                top_s.append(r[0])
+                nt = left_ds_pos[r[0]] * left_freq_arr
+                keep_nt = nt != 0
+                nt = nt[keep_nt]
+                if nt.size == 0:
+                    ds_avgd[r[0]] = 0.0
+                    ds_medd[r[0]] = 0.0
+                else:
+                    min_depth, max_depth = safe_percentile_bounds(
+                        nt, min_depth_percentile, max_depth_percentile
+                    )
+                    keep_nt2 = np.logical_and.reduce((nt >= min_depth, nt <= max_depth))
+                    if len(nt[keep_nt2]) != 0:
+                        nt = nt[keep_nt2]
+                    ds_avgd[r[0]] = float(np.mean(nt)) if nt.size else 0.0
+                    ds_medd[r[0]] = float(np.median(nt)) if nt.size else 0.0
+
+        if len(top_s) > 1:
+            rank_map_rate = {s: dmap_rate[s] for s in top_s}
+            res2 = sorted(rank_map_rate.items(), key=lambda d: d[1], reverse=True)
+            top_s = [r[0] for r in res2]
+
+        pre = [f"{r[0]}:{r[1]}" for r in resl]
+        top_pos_snp = ",".join(pre) + "\t" + str(len(top_s))
+        os_arr.append(top_pos_snp)
+        os_strain[top_pos_snp] = []
+
+        for s in top_s:
+            os_strain[top_pos_snp].append(s)
+            pos_arr = left_ds_pos[s] * (-1)
+            pos_arr[pos_arr == 0] = 1
+            left_freq_arr = left_freq_arr * pos_arr
+            left_freq_arr[left_freq_arr < 0] = 0
+
+        keep = left_freq_arr != 0
+        valid_map = len(left_freq_arr)
+        left_freq_arr = left_freq_arr[keep]
+        valid_map = valid_map - len(left_freq_arr)
+        vmap[top_pos_snp] = valid_map
+
+        if np.sum(left_freq_arr) != 0:
+            left_weighted_freq_arr = left_freq_arr / np.sum(left_freq_arr)
+
+        left_pos_snp = left_pos_snp[keep]
+        left_ps_freq_map = dict(zip(left_pos_snp, left_freq_arr))
+        for s in left_ds_pos:
+            left_ds_pos[s] = left_ds_pos[s][keep]
+        resl = sorted(left_ps_freq_map.items(), key=lambda d: d[1], reverse=True)
+
+    return os_strain, os_arr, vmap, ds_avgd, ds_medd
+
+
+def load_cluster_info(
+    cls_file: Path,
+    all_s: list[str],
+    sub_kmr_file: Path,
+    read_1: Path,
+    read_2: Path | None,
+    file_dir: Path,
+    min_depth_adf: float,
+) -> tuple[dict[str, str], dict[str, str]]:
+    s2cls: dict[str, str] = {}
+    s2sub: dict[str, str] = {}
+    candidate_cls: dict[str, str] = {}
+
+    with cls_file.open("r", encoding="utf-8") as fcls:
+        for raw_line in fcls:
+            line = raw_line.strip()
+            if not line:
+                continue
+            ele = line.split("\t")
+            if ele[0] not in all_s:
+                s2cls[ele[0]] = ele[2]
+                continue
+            if ele[2] == ele[3]:
+                s2cls[ele[0]] = ele[2]
+                s2sub[ele[0]] = "NA"
+            else:
+                s2cls[ele[0]] = ele[2]
+                candidate_cls[ele[2]] = ""
+
+    if len(candidate_cls) == 0:
+        return s2cls, s2sub
+
+    ksub: dict[str, dict[str, dict[str, str]]] = {}
+    cls_sub: dict[str, dict[str, int]] = {}
+
+    with sub_kmr_file.open("r", encoding="utf-8") as fsk:
+        for raw_line in fsk:
+            line = raw_line.strip()
+            if not line:
+                continue
+            ele = line.split("\t")
+            kmr = ele[0]
+            if ele[1] in candidate_cls:
+                if kmr not in ksub:
+                    ksub[kmr] = {ele[1]: {}}
+                if ele[1] not in ksub[kmr]:
+                    ksub[kmr][ele[1]] = {}
+                if ele[1] not in cls_sub:
+                    cls_sub[ele[1]] = {}
+                sub = ele[-1].split(",")
+                for s in sub:
+                    ksub[kmr][ele[1]][s] = ""
+                    cls_sub[ele[1]][s] = 0
+
+    temp_sub_fa = Path("Tem_Vs2Sub.fa")
+    with temp_sub_fa.open("w", encoding="utf-8") as ok:
+        co = 1
+        for kmr in ksub:
+            ok.write(f">{co}\n{kmr}\n")
+            co += 1
+
+    jellyfish_bin = file_dir / "jellyfish-linux"
+    jf2 = Path("Tem_VS2.jf")
+    fa2 = Path("Tem_Vs2.fa")
+
+    count_cmd = [
+        str(jellyfish_bin),
+        "count",
+        "-m",
+        "25",
+        "-s",
+        "100M",
+        "-t",
+        "8",
+        "--if",
+        str(temp_sub_fa),
+        "-o",
+        str(jf2),
+        str(read_1),
+    ]
+    if read_2 is not None:
+        count_cmd.append(str(read_2))
+    run_cmd(count_cmd)
+    run_cmd([str(jellyfish_bin), "dump", "-c", str(jf2)], stdout_path=fa2)
+
+    with fa2.open("r", encoding="utf-8") as ft2:
+        for raw_line in ft2:
+            line = raw_line.strip()
+            if not line:
+                continue
+            ele = line.split()
+            if len(ele) < 2:
+                continue
+            if int(ele[1]) >= min_depth_adf and ele[0] in ksub:
+                for c in ksub[ele[0]]:
+                    for c2 in ksub[ele[0]][c]:
+                        cls_sub[c][c2] += int(ele[1])
+
+    for s in all_s:
+        if s in s2sub:
+            continue
+        if s2cls[s] not in cls_sub:
+            s2sub[s] = "NA"
+        else:
+            res = sorted(cls_sub[s2cls[s]].items(), key=lambda d: d[1], reverse=True)
+            if len(res) < 2:
+                s2sub[s] = res[0][0] if res else "NA"
+            elif res[0][1] == res[1][1]:
+                s2sub[s] = "NA"
+            else:
+                s2sub[s] = res[0][0]
+
+    return s2cls, s2sub
+
+
+def write_text_report(
+    output_file: Path,
+    mp_strain: list[str],
+    os_arr: list[str],
+    os_strain: dict[str, list[str]],
+    vmap: dict[str, int],
+    s2cls: dict[str, str],
+    s2sub: dict[str, str],
+    dmap_rate: dict[str, float],
+    ds_num: dict[str, str],
+    ds_avgd: dict[str, float],
+    ds_medd: dict[str, float],
+    strain_unique: dict[str, dict[str, float]],
+    dmr: dict[str, float],
+    all_s: list[str],
+    top10_score_s: list[tuple[str, float]],
+) -> None:
+    with output_file.open("w", encoding="utf-8") as o:
+        o.write("\t\tStrain_ID\tCls_info\tSubCls_info\tMap_Score\tValid_Map_Rate\tTotal_Map_Rate\tStrain_Depth\tStrain_info\tUnique_SNP\n")
+        o.write(">>Most possible strains:\n")
+
+        for s in mp_strain:
+            if s in strain_unique:
+                o.write(
+                    f"\t\t{s}\t{s2cls.get(s, 'NA')}\t{s2sub.get(s, 'NA')}\t{dmap_rate.get(s, 0)}\t"
+                    f"{ds_num.get(s, '0/0')}\t{ds_num.get(s, '0/0')}\t"
+                    f"{ds_avgd.get(s, 0)},{ds_medd.get(s, 0)}\t\t\t{strain_unique[s]}\n"
+                )
+            else:
+                o.write(
+                    f"\t\t{s}\t{s2cls.get(s, 'NA')}\t{s2sub.get(s, 'NA')}\t{dmap_rate.get(s, 0)}\t"
+                    f"{ds_num.get(s, '0/0')}\t{ds_num.get(s, '0/0')}\t"
+                    f"{ds_avgd.get(s, 0)},{ds_medd.get(s, 0)}\t\t\tNA\n"
+                )
+
+        o.write(">>Other possible strains:\n")
+        if len(os_arr) > 0:
+            for s in os_arr:
+                ele = s.split("\t")
+                if vmap[s] == 1:
+                    o.write(f"\t>>(Could be FP){ele[0]},Genome_num: {ele[1]}\n")
+                else:
+                    o.write(f"\t>>{ele[0]},Genome_num: {ele[1]}\n")
+                for n in os_strain[s]:
+                    a = ds_num[n].split("/")[-1]
+                    vm = f"{vmap[s]}/{a}"
+                    if n in s2sub:
+                        o.write(
+                            f"\t\t{n}\t{s2cls.get(n, 'NA')}\t{s2sub.get(n, 'NA')}\t{dmap_rate.get(n, 0)}\t"
+                            f"{vm}\t{ds_num.get(n, '0/0')}\t{ds_avgd.get(n, 0)},{ds_medd.get(n, 0)}\t\t\tNot_record\n"
+                        )
+                    else:
+                        o.write(
+                            f"\t\t{n}\t{s2cls.get(n, 'NA')}\tNot_record\t{dmap_rate.get(n, 0)}\t"
+                            f"{vm}\t{ds_num.get(n, '0/0')}\t{ds_avgd.get(n, 0)},{ds_medd.get(n, 0)}\t\t\tNot_record\n"
+                        )
+        else:
+            o.write("\tCan not detect other strains.\n")
+
+        res = sorted(dmr.items(), key=lambda d: d[1], reverse=True)
+        o.write("\n>>Highest_Map_Strains (Could be FP):\n")
+        final: dict[str, float] = {}
+        if res:
+            for r in res:
+                if r[1] == res[0][1]:
+                    if r[0] not in all_s:
+                        final[r[0]] = dmap_rate[r[0]]
+        if len(final) != 0:
+            res2 = sorted(final.items(), key=lambda d: d[1], reverse=True)
+            for s in res2:
+                if s[0] in s2sub:
+                    o.write(
+                        f"\t\t{s[0]}\t{s2cls.get(s[0], 'NA')}\t{s2sub.get(s[0], 'NA')}\t{dmap_rate.get(s[0], 0)}\t"
+                        f"{ds_num.get(s[0], '0/0')}\t{ds_num.get(s[0], '0/0')}\tNA\tNA\n"
+                    )
+                else:
+                    o.write(
+                        f"\t\t{s[0]}\t{s2cls.get(s[0], 'NA')}\tNot_record\t{dmap_rate.get(s[0], 0)}\t"
+                        f"{ds_num.get(s[0], '0/0')}\t{ds_num.get(s[0], '0/0')}\tNA\tNA\n"
+                    )
+
+        o.write(">>Top10_Score_Strains:\n")
+        for t in top10_score_s:
+            if t[0] in s2sub:
+                o.write(
+                    f"\t\t{t[0]}\t{s2cls.get(t[0], 'NA')}\t{s2sub.get(t[0], 'NA')}\t{t[1]}\t"
+                    f"{ds_num.get(t[0], '0/0')}\t{ds_num.get(t[0], '0/0')}\tNA\tNA\n"
+                )
+            else:
+                o.write(
+                    f"\t\t{t[0]}\t{s2cls.get(t[0], 'NA')}\tNot_record\t{t[1]}\t"
+                    f"{ds_num.get(t[0], '0/0')}\t{ds_num.get(t[0], '0/0')}\tNA\tNA\n"
+                )
+
+
+def populate_visualization_dicts(
+    ds_freq: dict[str, np.ndarray],
+    ds_pos: dict[str, np.ndarray],
+    vs_sd: list[str],
+    vs_so: list[str],
+    pos_snp: np.ndarray,
+    pos_label: dict[str, int],
+    dscf: dict[str, dict[int, float]],
+    dscl: dict[str, dict[int, int]],
+) -> None:
+    for s in ds_freq:
+        check = 0
+        if s in vs_sd:
+            check = 1
+        if s in vs_so:
+            check = 2
+        if check == 0:
+            continue
+
+        for i, c in enumerate(ds_freq[s]):
+            if c == 0:
+                continue
+            current_ps = pos_snp[i]
+            column = int(current_ps.split("-")[0])
+            if column not in dscf[s]:
+                dscf[s][column] = float(c)
+
+        for i2, c in enumerate(ds_pos[s]):
+            if c == 0:
+                continue
+            current_ps = pos_snp[i2]
+            column = int(current_ps.split("-")[0])
+            if column not in dscl[s]:
+                dscl[s][column] = 0
+            if c == 1:
+                dscl[s][column] = pos_label[current_ps]
+
+
+def write_depth_csvs(
+    vs_sd: list[str],
+    vs_so: list[str],
+    pos_snp: np.ndarray,
+    dscf: dict[str, dict[int, float]],
+    dscl: dict[str, dict[int, int]],
+) -> None:
+    carr: list[int] = []
+    for c in pos_snp:
+        col = c.split("-")[0]
+        if int(col) not in carr:
+            carr.append(int(col))
+
+    with Path("Mps_ps_depth_SCOV2.csv").open("w", encoding="utf-8") as ov1:
+        ov1.write("ID,Column_ID")
+        for s in vs_sd:
+            ov1.write(f",{s}_Freq,{s}_LNum")
+        ov1.write("\n")
+
+        i = 1
+        for c in carr:
+            ov1.write(f"{i},{c}")
+            for s in vs_sd:
+                fval = dscf.get(s, {}).get(c, 0)
+                lval = dscl.get(s, {}).get(c, 0)
+                ov1.write(f",{fval},{lval}")
+            ov1.write("\n")
+            i += 1
+
+    with Path("Ops_ps_depth_SCOV2.csv").open("w", encoding="utf-8") as ov2:
+        ov2.write("ID,Column_ID")
+        if len(vs_so) == 0:
+            ov2.write(",None,None\n")
+        else:
+            for s in vs_so:
+                ov2.write(f",{s}_Freq,{s}_LNum")
+            ov2.write("\n")
+            i = 1
+            for c in carr:
+                ov2.write(f"{i},{c}")
+                for s in vs_so:
+                    if s not in dscf or s not in dscl:
+                        print(f"Warning: {s} not in final dict!")
+                        continue
+                    fval = dscf.get(s, {}).get(c, 0)
+                    lval = dscl.get(s, {}).get(c, 0)
+                    ov2.write(f",{fval},{lval}")
+                ov2.write("\n")
+                i += 1
+
+
+def cleanup_temp_files() -> None:
+    for pattern in ["Tem_Vs*", "Tem_VS*"]:
+        for p in Path(".").glob(pattern):
+            try:
+                p.unlink()
+            except IsADirectoryError:
+                pass
+            except FileNotFoundError:
+                pass
+
+
+def main() -> int:
+    args = parse_args()
+
+    read_1 = Path(args.input_reads).resolve()
+    read_2 = Path(args.input_reads2).resolve() if args.input_reads2 else None
+    snp_kmr_file = Path(args.snp_kmer_file).resolve()
+    snp_kmr_fa = Path(args.snp_kmer_fa).resolve()
+    matrix_file = Path(args.matrix_file).resolve()
+    cls_file = Path(args.cls_file).resolve()
+    sub_kmr_file = Path(args.sub_kmr_file).resolve()
+    out_dir = Path(args.output).resolve()
+    k = args.kmer_size
+
+    file_dir = Path(__file__).resolve().parent
+
+    dkps, dpsc = load_kmer_to_snp(snp_kmr_file)
+    pos_snp, _ = load_matrix_header(matrix_file)
+
+    jf_file = Path("Tem_VS.jf")
+    fa_file = Path("Tem_Vs.fa")
+
+    try:
+        count_kmers(file_dir, snp_kmr_fa, read_1, read_2, jf_file, fa_file, k)
+        update_dpsc_from_dump(fa_file, dkps, dpsc)
+
+        freq_arr = build_freq_arr(pos_snp, dpsc)
+        filtered_freq_arr, min_depth_adf = compute_filtered_freq(freq_arr)
+
+        if np.sum(filtered_freq_arr) == 0:
+            weighted_freq_arr = np.zeros_like(filtered_freq_arr, dtype=float)
+        else:
+            weighted_freq_arr = filtered_freq_arr / np.sum(filtered_freq_arr)
+
+        pos_freq_map = dict(zip(pos_snp, filtered_freq_arr))
+
+        (
+            ds_pos,
+            ds_freq,
+            dmap_rate,
+            ds_num,
+            dmr,
+            dscf,
+            dscl,
+            all_ps,
+        ) = load_strain_matrix(matrix_file, filtered_freq_arr, weighted_freq_arr)
+
+        all_sum = np.sum(all_ps, axis=0) if all_ps.size else np.array([0] * len(pos_snp))
+        pos_label = dict(zip(pos_snp, list(all_sum)))
+
+        top_map_strain, top10_score_s = compute_top_map_strains(dmr, dmap_rate)
+        top_map_strain = resolve_top_map_ties(
+            top_map_strain, ds_pos, filtered_freq_arr, pos_snp, dmap_rate, dmr
+        )
+
+        strain_unique, _strain_unique_count = collect_unique_snps(
+            top_map_strain, ds_pos, pos_snp, pos_freq_map
+        )
+
+        mp_strain: list[str] = []
+        if len(strain_unique) != 0:
+            for s in strain_unique:
+                mp_strain.append(s)
+        else:
+            for r in top_map_strain:
+                mp_strain.append(r)
+
+        ds_avgd, ds_medd, left_after_mp = compute_depth_stats(
+            mp_strain, ds_freq, ds_pos, filtered_freq_arr
+        )
+
+        (
+            os_strain,
+            os_arr,
+            vmap,
+            ds_avgd,
+            ds_medd,
+        ) = compute_other_possible_strains(
+            mp_strain,
+            ds_pos,
+            ds_freq,
+            dmap_rate,
+            left_after_mp,
+            pos_snp,
+            ds_avgd,
+            ds_medd,
+        )
+
+        all_s: list[str] = []
+        vs_sd: list[str] = []
+        vs_so: list[str] = []
+
+        for s in mp_strain:
+            all_s.append(s)
+            vs_sd.append(s)
+
+        if len(os_arr) > 0:
+            for s in os_arr:
+                all_s.append(os_strain[s][0])
+                if vmap[s] > 1:
+                    vs_so.append(os_strain[s][0])
+
+        s2cls, s2sub = load_cluster_info(
+            cls_file, all_s, sub_kmr_file, read_1, read_2, file_dir, min_depth_adf
+        )
+
+        write_text_report(
+            out_dir,
+            mp_strain,
+            os_arr,
+            os_strain,
+            vmap,
+            s2cls,
+            s2sub,
+            dmap_rate,
+            ds_num,
+            ds_avgd,
+            ds_medd,
+            strain_unique,
+            dmr,
+            all_s,
+            top10_score_s,
+        )
+
+        print("Txt report is done. Now will generate pdf report!")
+
+        vs_so = vs_so[:5]
+        populate_visualization_dicts(
+            ds_freq,
+            ds_pos,
+            vs_sd,
+            vs_so,
+            np.array(pos_snp),
+            pos_label,
+            dscf,
+            dscl,
+        )
+        write_depth_csvs(vs_sd, vs_so, np.array(pos_snp), dscf, dscl)
+
+    finally:
+        cleanup_temp_files()
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
