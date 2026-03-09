@@ -3,14 +3,10 @@
 from __future__ import annotations
 
 import argparse
-import re
 import shutil
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
-
-from bin import prescan
 
 __author__ = "Liao Herui"
 
@@ -18,124 +14,37 @@ USAGE = "VirStrain - An RNA virus strain-level identification tool for short rea
 
 
 def run_cmd(cmd: list[str], cwd: Path | None = None) -> None:
-    """Run a command and raise an exception if it fails."""
+    """Run a command and fail immediately if it returns a non-zero exit code."""
     subprocess.run(cmd, check=True, cwd=str(cwd) if cwd else None)
 
 
-def split_contig(
-    ingenome: Path,
-    kmers: Path,
-    report_handle,
-    min_length: int = 100,
-) -> tuple[dict[Path, str], Path]:
-    """
-    Split contigs that match the merged DB into separate FASTA files.
-
-    Returns
-    -------
-    tuple
-        (dictionary of contig fasta paths, temp directory path)
-    """
-    temp_index_prefix = Path(tempfile.mkdtemp(prefix="virstrain_bt2_")) / "bt2_index"
-    temp_contig_dir = Path(tempfile.mkdtemp(prefix="virstrain_contigs_"))
-    sam_file = temp_index_prefix.parent / "alignment.sam"
-
-    # Build Bowtie2 index and align kmers
-    run_cmd(["bowtie2-build", str(ingenome), str(temp_index_prefix)])
-    run_cmd(
-        [
-            "bowtie2",
-            "-x",
-            str(temp_index_prefix),
-            "-f",
-            str(kmers),
-            "--score-min",
-            "C,0,0",
-            "-S",
-            str(sam_file),
-        ]
-    )
-
-    matched_contigs: dict[str, str] = {}
-
-    with sam_file.open("r", encoding="utf-8") as handle:
-        for raw_line in handle:
-            line = raw_line.strip()
-            if not line or line.startswith("@"):
-                continue
-            fields = line.split("\t")
-            if len(fields) > 2 and fields[2] != "*":
-                matched_contigs[fields[2]] = ""
-
-    # Clean Bowtie2 intermediate files
-    for file in temp_index_prefix.parent.glob("bt2_index*"):
-        file.unlink(missing_ok=True)
-    sam_file.unlink(missing_ok=True)
-
-    sequences: dict[str, str] = {}
-    current_header: str | None = None
-    keep = False
-
-    with ingenome.open("r", encoding="utf-8") as handle:
-        for raw_line in handle:
-            line = raw_line.strip()
-            if not line:
-                continue
-
-            if line.startswith(">"):
-                current_header = line
-                contig_id = line.split()[0].removeprefix(">")
-                if contig_id in matched_contigs:
-                    keep = True
-                    sequences[current_header] = ""
-                else:
-                    keep = False
-                    report_handle.write(f"{contig_id}\tNA\tSkip\n")
-            else:
-                if keep and current_header is not None:
-                    sequences[current_header] += line
-
-    result: dict[Path, str] = {}
-
-    for header, seq in sequences.items():
-        if len(seq) < min_length:
-            continue
-
-        contig_id = header.removeprefix(">").split()[0]
-        out_fasta = temp_contig_dir / f"{contig_id}.fasta"
-        with out_fasta.open("w", encoding="utf-8") as out_handle:
-            out_handle.write(f"{header}\n{seq}\n")
-        result[out_fasta] = ""
-
-    shutil.rmtree(temp_index_prefix.parent, ignore_errors=True)
-    return result, temp_contig_dir
-
-
-def read_third_data_line(report_file: Path) -> str:
-    """
-    Read the third line from a VirStrain report and convert tabs to pipes.
-    """
-    with report_file.open("r", encoding="utf-8") as handle:
-        lines = [handle.readline().strip() for _ in range(3)]
-
-    if len(lines) < 3 or not lines[2]:
-        return "NA"
-
-    return lines[2].replace("\t", "|")
+def move_existing(file_names: list[str], out_dir: Path) -> None:
+    """Move output files to the destination directory if they exist."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    for name in file_names:
+        src = Path(name)
+        if src.exists():
+            shutil.move(str(src), str(out_dir / src.name))
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        prog="VirStrain.py",
-        description=USAGE,
-    )
+    parser = argparse.ArgumentParser(prog="VirStrain.py", description=USAGE)
+    parser.add_argument("-v", "--version", action="version", version="%(prog)s v1.17")
     parser.add_argument(
         "-i",
-        "--input_contigs",
-        dest="input_contigs",
+        "--input_reads",
+        dest="input_reads",
         type=str,
         required=True,
-        help="Input contig FASTA data --- Required",
+        help="Input fastq data --- Required",
+    )
+    parser.add_argument(
+        "-p",
+        "--input_reads2",
+        dest="input_reads2",
+        type=str,
+        default=None,
+        help="Input fastq data for PE reads.",
     )
     parser.add_argument(
         "-d",
@@ -170,6 +79,14 @@ def parse_args() -> argparse.Namespace:
         help="If set to 1, then VirStrain will sort the most possible strain by matches to the sites. (default: 0)",
     )
     parser.add_argument(
+        "-f",
+        "--turn_off_figures",
+        dest="close_fig",
+        type=int,
+        default=0,
+        help="If set to 1, then VirStrain will not generate figures. (default: 0)",
+    )
+    parser.add_argument(
         "-m",
         "--high_mutation_virus",
         dest="hm_virus",
@@ -183,75 +100,121 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
 
-    in_contigs = Path(args.input_contigs).resolve()
+    in_read1 = Path(args.input_reads).resolve()
+    in_read2 = Path(args.input_reads2).resolve() if args.input_reads2 else None
     db_dir = Path(args.db_dir).resolve()
     out_dir = Path(args.out_dir).resolve()
-    rank_sites = int(args.rk_site)
+    rks = int(args.rk_site)
+    cf = int(args.close_fig)
+    hm = args.hm_virus
 
     out_dir.mkdir(parents=True, exist_ok=True)
-    report_dir = out_dir / "Report"
-    report_dir.mkdir(parents=True, exist_ok=True)
 
-    merged_db_fa = db_dir / "merge_db.fa"
-    if not in_contigs.exists():
-        raise FileNotFoundError(f"Input contig FASTA not found: {in_contigs}")
-    if not merged_db_fa.exists():
-        raise FileNotFoundError(f"Merged DB FASTA not found: {merged_db_fa}")
+    # Note:
+    # The original script parses sf_cutoff but never uses it.
+    # Preserved here for compatibility, but intentionally unused.
+    _sfc = float(args.sf_cutoff)
 
-    summary_report = out_dir / "VirStrain_contig_report.txt"
+    if not in_read1.exists():
+        raise FileNotFoundError(f"Input reads not found: {in_read1}")
+    if in_read2 is not None and not in_read2.exists():
+        raise FileNotFoundError(f"Paired-end reads file not found: {in_read2}")
+    if not db_dir.exists():
+        raise FileNotFoundError(f"Database directory not found: {db_dir}")
 
-    with summary_report.open("w", encoding="utf-8") as out_handle:
-        out_handle.write("Contigs_ID\tSpecies_info\tStrain_info\n")
+    # whether this is the virus with high mutation rate, like HIV
+    # Preserved original logic:
+    # if hm is falsy / absent, run HIV-specific script.
+    if not hm:
+        hiv_cmd = [
+            sys.executable,
+            "bin/S3_Strain_pred_My_Method_For_HIV.py",
+            "-i",
+            str(in_read1),
+            "-s",
+            str(db_dir / "Pos-snp-kmer-all.txt"),
+            "-f",
+            str(db_dir / "Pos-snp-kmer-all.fa"),
+            "-c",
+            str(db_dir / "Remove_redundant_matrix_MM_Call.clstr"),
+            "-d",
+            str(db_dir / "ID2Name.txt"),
+            "-b",
+            str(db_dir),
+            "-o",
+            "VirStrain_report.txt",
+        ]
 
-        contigs, temp_contig_dir = split_contig(in_contigs, merged_db_fa, out_handle)
+        if in_read2 is not None:
+            hiv_cmd.extend(["-p", str(in_read2)])
 
-        try:
-            for genome in contigs:
-                contig_name = genome.stem
-                out_handle.write(contig_name)
+        run_cmd(hiv_cmd)
 
-                target_sp, kmatch = prescan.scan(str(genome), str(merged_db_fa))
+        if Path("VirStrain_report.txt").exists():
+            run_cmd([sys.executable, "bin/S4_Plot_strain_cov.py"])
+            move_existing(
+                [
+                    "VirStrain_report.txt",
+                    "VirStrain_report.html",
+                    "Mps_ps_depth.csv",
+                    "Ops_ps_depth.csv",
+                ],
+                out_dir,
+            )
+        return 0
 
-                if int(kmatch) < 10:
-                    out_handle.write(f"\t{target_sp}:{kmatch}\tSkip\n")
-                    continue
+    # Start to identify strains
+    strain_cmd = [
+        sys.executable,
+        "bin/S3_Strain_pred_My_Method_V0819_Val.py",
+        "-i",
+        str(in_read1),
+        "-s",
+        str(db_dir / "Pos-snp-kmer-all.txt"),
+        "-m",
+        str(db_dir / "Strain_pos_snp_matrix_not_redundant_MM_Call.txt"),
+        "-f",
+        str(db_dir / "Pos-snp-kmer-all.fa"),
+        "-c",
+        str(db_dir / "Strain_cls_info.txt"),
+        "-b",
+        str(db_dir / "SubCls_kmer.txt"),
+        "-d",
+        str(db_dir),
+        "-o",
+        "VirStrain_report.txt",
+    ]
 
-                nd_dir = db_dir / target_sp
-                per_contig_report = Path(f"{contig_name}_VirStrain_report.txt")
+    if in_read2 is not None:
+        strain_cmd.extend(["-p", str(in_read2)])
 
-                cmd = [
-                    sys.executable,
-                    "bin/S3_Strain_pred_My_Method_V0819_Val_contig.py",
-                    "-i",
-                    str(genome),
-                    "-s",
-                    str(nd_dir / "Pos-snp-kmer-all.txt"),
-                    "-m",
-                    str(nd_dir / "Strain_pos_snp_matrix_not_redundant_MM_Call.txt"),
-                    "-f",
-                    str(nd_dir / "Pos-snp-kmer-all.fa"),
-                    "-c",
-                    str(nd_dir / "Strain_cls_info.txt"),
-                    "-b",
-                    str(nd_dir / "SubCls_kmer.txt"),
-                    "-d",
-                    str(nd_dir),
-                    "-o",
-                    str(per_contig_report),
-                ]
+    if rks != 0:
+        strain_cmd.extend(["-r", "1"])
 
-                if rank_sites == 1:
-                    cmd.extend(["-r", "1"])
+    run_cmd(strain_cmd)
 
-                run_cmd(cmd)
-
-                third_line = read_third_data_line(per_contig_report)
-                out_handle.write(f"\t{target_sp}:{kmatch}\t{third_line}\n")
-
-                shutil.move(str(per_contig_report), str(report_dir / per_contig_report.name))
-
-        finally:
-            shutil.rmtree(temp_contig_dir, ignore_errors=True)
+    # Plot HTML page
+    if Path("VirStrain_report.txt").exists():
+        if cf == 0:
+            run_cmd([sys.executable, "bin/S4_Plot_strain_cov.py"])
+            move_existing(
+                [
+                    "VirStrain_report.txt",
+                    "VirStrain_report.html",
+                    "Mps_ps_depth.csv",
+                    "Ops_ps_depth.csv",
+                ],
+                out_dir,
+            )
+        else:
+            move_existing(
+                [
+                    "VirStrain_report.txt",
+                    "Mps_ps_depth.csv",
+                    "Ops_ps_depth.csv",
+                ],
+                out_dir,
+            )
 
     return 0
 
