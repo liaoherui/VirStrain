@@ -66,6 +66,7 @@ def make_strain_figure(df: pd.DataFrame, strain: str, title: str) -> go.Figure:
             x=df["ID"],
             y=df[freq_col],
             name="depth",
+            marker=dict(color="#1f77b4"),
         ),
         secondary_y=False,
     )
@@ -74,8 +75,9 @@ def make_strain_figure(df: pd.DataFrame, strain: str, title: str) -> go.Figure:
             x=df["ID"],
             y=(-1) * df[lnum_col],
             mode="lines+markers",
-            opacity=0.5,
-            marker=dict(size=5),
+            opacity=0.7,
+            marker=dict(size=5, color="#f0ad6d"),
+            line=dict(color="#f0ad6d"),
             name="(-1)*(strain number)",
         ),
         secondary_y=True,
@@ -85,7 +87,7 @@ def make_strain_figure(df: pd.DataFrame, strain: str, title: str) -> go.Figure:
             x=zx,
             y=zy,
             mode="markers",
-            opacity=0.5,
+            opacity=0.7,
             marker=dict(size=5, color="red"),
             name="Zero depth pos",
         ),
@@ -99,7 +101,10 @@ def make_strain_figure(df: pd.DataFrame, strain: str, title: str) -> go.Figure:
         autosize=False,
         width=1200,
         height=300,
-        title={"text": title, "xanchor": "center"},
+        template="plotly_white",
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        title={"text": title, "x": 0.5, "xanchor": "center"},
     )
     fig.update_yaxes(range=[(-3) * max_lnum, 3 * max_lnum], secondary_y=True)
     fig.update_yaxes(range=[(-1) * max_freq, max_freq], secondary_y=False)
