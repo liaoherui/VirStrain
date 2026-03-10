@@ -17,7 +17,7 @@ VirStrain supports:
 ## Contact
 
 - **Email:** heruiliao2-c@my.cityu.edu.hk
-- **Recommended version:** **v1.17**
+- **Recommended version:** **v1.18**
 - **Legacy note:** **v1.14** fixed some bugs, but did **not** include `virstrain_contig` or `virstrain_merge`
 
 ---
