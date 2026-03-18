@@ -179,7 +179,7 @@ cd VirStrain
 wget -qO- "https://figshare.com/ndownloader/files/34002479" | tar -zx
 ```
 
-You may also download the database manually from Figshare and extract it with:
+You may also download the database manually from [Google Drive](https://docs.google.com/uc?export=download&id=1XYqr64tJec7VeDBD0Xc9cuUZqmawoty6) or [Figshare](https://figshare.com/ndownloader/files/34002479) and extract it with:
 
 ```bash
 tar -zxvf <downloaded_file>
