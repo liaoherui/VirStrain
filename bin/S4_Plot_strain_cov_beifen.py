@@ -1,81 +1,128 @@
+#!/usr/bin/env python3
+
+from __future__ import annotations
+
 import re
-import os
+import sys
+from pathlib import Path
+
 import pandas as pd
-import numpy as np
-#import matplotlib.pyplot as plt
-from _plotly_future_ import v4_subplots
-import plotly.plotly as py
-import  plotly.graph_objs as go
+import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-#from plotly import tools
 
-sfl=pd.read_csv('Mps_ps_depth_HIV.csv')
-sf2=pd.read_csv('Ops_ps_depth_HIV.csv')
-#print(sfl.columns)
-# Get 
-s=[]
-for e in list(sfl.columns):
-	if re.search('ID',e):continue
-	name=re.split('_',e)[0]
-	if name not in s:
-		s.append(name)
-so=[]
-for e in list(sf2.columns):
-	if re.search('ID',e):continue
-	if re.search('None',e):continue
-	name=re.split('_',e)[0]
-	if name not in so:
-		so.append(name)
 
-#fig=plt.figure(figsize=(17,6))
-#ax=fig.add_subplot(111)
-#width=0.2
+def extract_strain_prefixes(df: pd.DataFrame, skip_none: bool = False) -> list[str]:
+    """
+    Extract unique strain prefixes from dataframe columns.
+    """
+    prefixes: list[str] = []
+    for col in df.columns:
+        if "ID" in col:
+            continue
+        if skip_none and "None" in col:
+            continue
+        name = re.split(r"_", col)[0]
+        if name not in prefixes:
+            prefixes.append(name)
+    return prefixes
 
-#sfl.plot('ID',s[0]+'_Freq',kind='bar')
-#plt.xlabel("")
-#plt.savefig('Test_cov.png')
-#fig=py.iplot({'data':[Bar(x=sfl['ID'],y=sfl[s[0]+'_Freq'])],'layout':{'margin':{'b':300},'xaxis':{'tickangle':50}}})
-#fig = tools.make_subplots(rows=2, cols=1, subplot_titles=['Depth', 'Label_Number'], shared_xaxes=True, shared_yaxes=False)
-#traces=[go.Bar(x=sfl['ID'],y=sfl[s[0]+'_Freq']),go.Bar(x=sfl['ID'],y=sfl[s[0]+'_LNum'])]
-# Extract 0 freq
-i=0
-zx=[]
-zy=[]
-for sw in sfl[s[0]+'_Freq']:
-	if sw==0: 
-		zx.append(sfl['ID'][i])
-		zy.append(sw)
-	i+=1
-ft=open('Test.html','w+')
-fig=go.Figure()
-fig = make_subplots(specs=[[{"secondary_y": True}]])
-fig.add_trace(go.Bar(x=sfl['ID'],y=sfl[s[0]+'_Freq'],name='depth'),secondary_y=False,)
-#fig.add_trace(go.Scatter(x=zx,y=zy,mode='markers',opacity=0.5,marker=dict(size=5),name='Zero depth pos'),secondary_y=False,)
-fig.add_trace(go.Scatter(x=sfl['ID'],y=(-1)*sfl[s[0]+'_LNum'],mode='lines+markers',opacity=0.5,marker=dict(size=5),name='(-1)*(strain number)'),secondary_y=True,)
-fig.add_trace(go.Scatter(x=zx,y=zy,mode='markers',opacity=0.5,marker=dict(size=5,color='red'),name='Zero depth pos'),secondary_y=False,)
-#fig2=go.Figure()
-#fig2.add_trace(go.Bar(x=sfl['ID'],y=(sfl[s[0]+'_LNum'])))
-'''
-fig.append_trace(traces[0],1,1)
-fig.append_trace(traces[1],2,1)
-fig.layout.update(autosize=False,width=1000,height=500,)
-mi=sfl[s[0]+'_LNum'].min()
-ma=sfl[s[0]+'_LNum'].max()
-print(mi)
-fig['layout']['yaxis2'].update(title='',range=[mi,ma],autorange=False)
-'''
-ma=sfl[s[0]+'_LNum'].max()
-ma2=sfl[s[0]+'_Freq'].max()
-fig.layout.update(autosize=False,width=1200,height=300,title={'text':'Most Possible Strain: '+s[0],'xanchor': 'center'})
-#fig['layout']['yaxis2']['autorange']
-#fig['layout']['yaxis2']['autorange'] = "reversed"
-fig.update_yaxes(range=[(-3)*ma,3*ma],secondary_y=True,)
-#fig['layout']['yaxis2']['autorange'] = "reversed"
-fig.update_yaxes(range=[(-1)*ma2,ma2],secondary_y=False,)
-#with open('Test.html','a') as ft:
-ft.write(fig.to_html(full_html=False, include_plotlyjs='cdn'))
-#ft.write(fig.to_html(full_html=False, include_plotlyjs='cdn'))
-#ft.write(fig.to_html(full_html=False, include_plotlyjs='cdn'))
-#ft.write(fig.to_html(full_html=False, include_plotlyjs='cdn'))
-#fig.write_html('Test.html')
 
+def main() -> int:
+    mps_file = Path("Mps_ps_depth_HIV.csv")
+    ops_file = Path("Ops_ps_depth_HIV.csv")
+    output_html = Path("Test.html")
+
+    if not mps_file.exists():
+        raise FileNotFoundError(f"Missing input file: {mps_file}")
+    if not ops_file.exists():
+        raise FileNotFoundError(f"Missing input file: {ops_file}")
+
+    sfl = pd.read_csv(mps_file)
+    sf2 = pd.read_csv(ops_file)
+
+    if "ID" not in sfl.columns:
+        raise ValueError("Column 'ID' not found in Mps_ps_depth_HIV.csv")
+    if "ID" not in sf2.columns:
+        raise ValueError("Column 'ID' not found in Ops_ps_depth_HIV.csv")
+
+    s = extract_strain_prefixes(sfl)
+    so = extract_strain_prefixes(sf2, skip_none=True)
+
+    if not s:
+        raise ValueError("No strain-related columns found in Mps_ps_depth_HIV.csv")
+
+    # Keep the original behavior: only use the first detected strain prefix
+    strain = s[0]
+    freq_col = f"{strain}_Freq"
+    lnum_col = f"{strain}_LNum"
+
+    if freq_col not in sfl.columns:
+        raise ValueError(f"Expected column not found: {freq_col}")
+    if lnum_col not in sfl.columns:
+        raise ValueError(f"Expected column not found: {lnum_col}")
+
+    zero_mask = sfl[freq_col] == 0
+    zx = sfl.loc[zero_mask, "ID"]
+    zy = sfl.loc[zero_mask, freq_col]
+
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    fig.add_trace(
+        go.Bar(
+            x=sfl["ID"],
+            y=sfl[freq_col],
+            name="depth",
+        ),
+        secondary_y=False,
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=sfl["ID"],
+            y=(-1) * sfl[lnum_col],
+            mode="lines+markers",
+            opacity=0.5,
+            marker=dict(size=5),
+            name="(-1)*(strain number)",
+        ),
+        secondary_y=True,
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=zx,
+            y=zy,
+            mode="markers",
+            opacity=0.5,
+            marker=dict(size=5, color="red"),
+            name="Zero depth pos",
+        ),
+        secondary_y=False,
+    )
+
+    max_lnum = sfl[lnum_col].max()
+    max_freq = sfl[freq_col].max()
+
+    fig.update_layout(
+        autosize=False,
+        width=1200,
+        height=300,
+        title={
+            "text": f"Most Possible Strain: {strain}",
+            "xanchor": "center",
+        },
+    )
+
+    fig.update_yaxes(range=[(-3) * max_lnum, 3 * max_lnum], secondary_y=True)
+    fig.update_yaxes(range=[(-1) * max_freq, max_freq], secondary_y=False)
+
+    output_html.write_text(
+        fig.to_html(full_html=False, include_plotlyjs="cdn"),
+        encoding="utf-8",
+    )
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

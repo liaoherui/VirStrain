@@ -78,7 +78,7 @@ for(my $i=$start; $i<=$end; $i++)
     {
 	my $char = $seq[$j][$i];
 	#print $char, "\n";
-	if($char=~/[acgt-]/)
+	if (defined $char && $char =~ /[acgt-]/)
 	{
 	    $count{$char}++;
 	}
