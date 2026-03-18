@@ -1,441 +1,261 @@
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/virstrain/README.html)
+# VirStrain   <img src="logo.png" width="250" title="VirStrain">
+An RNA virus strain-level identification tool for short reads.
 
-[![Install with Bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/virstrain/README.html)
 
-# VirStrain <img src="logo.png" width="250" title="VirStrain" align="right" />
 
-**VirStrain** is an RNA virus strain-level identification tool for short-read sequencing data.
-
-## Overview
-
-VirStrain supports:
-
-- Strain identification from **single-end** and **paired-end** short reads
-- Strain identification from **assembled contigs**
-- Construction of **custom VirStrain databases**
-- Use of **pre-built public databases** for common viral species
-
-## Contact
-
-- **Email:** heruiliao2-c@my.cityu.edu.hk
-- **Recommended version:** **v1.18**
-- **Legacy note:** **v1.14** fixed some bugs, but did **not** include `virstrain_contig` or `virstrain_merge`
-
----
-
-## Changelog
+### E-mail: heruiliao2-c@my.cityu.edu.hk
+### Recommanded Version: V1.17
+* *Old Version - V1.14: Fix some bugs but lack virstrain_contig and virstrain_merge. <BR/>*
 
 <details>
-<summary><strong>2024 updates</strong></summary>
+<summary> Click here to check the log of all updates </summary>
+  
+#### *__[Update - 2022 - 02 - 05]__* :  <BR/>
+ 
+* *V1.12: VirStrain is able to take gzipped FASTQs as input now! <BR/>*
 
-### 2024-05-28
-- **v1.17**: Added the `-v` parameter to display version information  
-  _Available in the GitHub version only_
+#### *__[Update - 2022 - 03 - 23]__* :  <BR/>
+ 
+* *Fix one bug of the perl script about head name problem.*
 
-### 2024-03-11
-- **v1.17**: Synced all changes to both **GitHub** and **Conda**
+#### *__[Update - 2022 - 11 - 10]__* :  <BR/>
 
-### 2024-02-27
-- `Tem_Vs` files are now named randomly in the **GitHub version**
-- Added links for downloading **pre-built databases**
+* *Update a new parameter '-s' that allows sorting the most possible strain by matches to the sites.*
 
+#### *__[Update - 2022 - 12 - 16]__* :  <BR/>
+
+* *The web server extension of VirStrain - StrainDetect (https://strain.ee.cityu.edu.hk) is online now!*
+
+#### *__[Update - 2022 - 12 - 20]__* :  <BR/>
+
+* *V1.13: Fix a database generation bug in V1.12 of bioconda version! <BR/>*
+ <!----->
 </details>
+  
+#### *__[Update - 2023 - 09 - 05]__* :  <BR/> 
+* *A new function that allows comprehensive (including **45619** strains of **28** viral species) viral strain identification for assembled contigs is available!  <BR/>*
 
-<details>
-<summary><strong>2023 updates</strong></summary>
+#### *__[Update - 2023 - 10 - 12]__* :  <BR/> 
+* *V1.14: Fix a bug (about handling gzipped FASTQs) in V1.13! <BR/>*
 
-### 2023-10-12
-- **v1.14**: Fixed a bug in **v1.13** related to handling gzipped FASTQ files
+#### *__[Update - 2024 - 02 - 27]__* :  <BR/> 
+* *Tem_Vs files are named randomly (only GitHub version) and links for pre-built databases are provided. <BR/>*
 
-### 2023-09-05
-- Added a new function for **contig-based viral strain identification**
-- Supports comprehensive identification across **45,619 strains** from **28 viral species**
+#### *__[Update - 2024 - 03 - 11]__* :  <BR/> 
+* *V1.17: All the changes made so far have been updated in both GitHub and Conda. <BR/>*
 
-</details>
+#### *__[Update - 2024 - 05 - 28]__* :  <BR/> 
+* *V1.17: Add the parameter '-v' to show the version information. (GitHub version available only) <BR/>*
+    
+---------------------------------------------------------------------------
+### Dependencies:
+* Python >=3.6 (3.7.3 is recommanded and 3.9 is not supprted now!)
+* Perl
+* Required python package: networkx==2.4, numpy==1.17.3, pandas==1.0.1, biopython==1.74, Plotly==3.10.0
+* **Bowtie2 (for virstrain version >= V1.17)**
 
-<details>
-<summary><strong>2022 updates</strong></summary>
+(If you have installed conda, then you can run `sh install_package.sh` to install all required packages automatically.)
 
-### 2022-12-20
-- **v1.13**: Fixed a database generation bug present in **v1.12** of the Bioconda release
+Make sure these programs have been installed before using VirStrain. (However, if you use bioconda/pip to install VirStrain, ignore this.)
 
-### 2022-12-16
-- The VirStrain web server extension, **StrainDetect**, is now online:  
-  https://strain.ee.cityu.edu.hk
+## Install (Linux or ubuntu only)
 
-### 2022-11-10
-- Added parameter `-s` to sort the most likely strain by site matches
+The first way to install VirStrain, is to use [bioconda](https://bioconda.github.io/).
+Once you have bioconda environment installed, install package virstrain:
 
-### 2022-03-23
-- Fixed a Perl script bug related to header name handling
+	conda install -c bioconda virstrain
 
-### 2022-02-08
-- Added an alternative method for downloading databases from Figshare
+The second way to install VirStrain, is to use [pip](https://pypi.org/project/virstrain/):
 
-### 2022-02-05
-- **v1.12**: VirStrain can now accept **gzipped FASTQ** input files
+	pip install virstrain==1.17
 
-</details>
+It should be noted that some commands have been replaced if you install VirStrain using bioconda/pip. (See below)
 
-<details>
-<summary><strong>2021 updates</strong></summary>
+Command (Not bioconda/pip)    |	Command (bioconda/pip)
+------------ | ------------- 
+python VirStrain.py -h | virstrain -h
+python VirStrain_build.py -h | virstrain_build -h
+python VirStrain_contig.py -h | virstrain_contig -h
+python VirStrain_contigDB_merge.py -h | virstrain_merge -h
 
-### 2021-11
-- Added downloadable databases for two DNA viruses used in the paper:
-  - **HBV**
-  - **HCMV**
-- Added a larger **SARS-CoV-2** database  
-  See Supplementary Section 1.1 of the paper
 
-</details>
+Or you can install VirStrain mannually (Make sure all dependencies have been installed before this step).
+####
+`git clone https://github.com/liaoherui/VirStrain.git`<BR/>
+`cd VirStrain`<BR/>
+`chmod 755 bin/jellyfish-linux`<BR/>
+`rm VirStrain_DB.tar.gz`<BR/>
+####
 
----
+Then, you can download the reference database of 3 RNA viruses used in the paper. 
+There are three ways to download the reference database.<BR/><BR/>
+-> Method-1:<BR/>
+Run:<BR/>
+`cd VirStrain`<BR/>
+`sh download.sh`<BR/> <BR/>
 
-## Requirements
+#### *__[Update - 2022 - 02 - 08]__* :  <BR/>
 
-### Dependencies
+* *-> Method-2:<BR/>*
+Run:<BR/>
+`cd VirStrain`<BR/>
+`wget -qO- "https://figshare.com/ndownloader/files/34002479" | tar -zx`<BR/>
+Or, download the database from [figshare](https://figshare.com/articles/dataset/VirStrain_DB_tar_gz/19134590/1) mannually, and then extract it using the command `tar -zxvf`.
 
-- **Python** >= 3.10  
-  - **Recommended:** 3.10.19  
-  - **Should work on python >3.11 as well**
-- **Perl**
-- Python packages:
-  - `networkx==3.3`
-  - `numpy==1.26.4`
-  - `pandas==2.3.3`
-  - `biopython==1.84`
-  - `plotly==6.5.0`
-- **Bowtie2**  
-  Required for VirStrain version **>= v1.18**
+If all failed, please email to the author to get the database.
 
-If you use Conda, you can install required packages automatically with:
+#### *__[Update - 2021 - Nov]__* :  <BR/>
+ 
+* *The databases of two DNA viruses (HBV and HCMV) used in the paper can be downloaded now! <BR/>*
+`sh download_dna.sh`<BR/>
+* *Besides, a larger database with more SARS-CoV-2 strains (see Supplementary Section 1.1 in the paper) can also be downloaded now. <BR/>*
+`sh download_scov2_big.sh`<BR/> 
 
-```bash
-sh install_package.sh
-````
+You can also build the VirStrain database with your own genomes, the mannual is written in Usage section.
 
-> If you install VirStrain via **Bioconda** or **pip**, you can ignore manual dependency installation.
-
----
-
-## Installation
-
-> Supported platform: **Linux / Ubuntu**
-
-### Option 1: Install with Bioconda
-
-Once Bioconda is configured:
-
-```bash
-conda install -c bioconda virstrain
-chmod 755 bin/jellyfish-linux
-```
-
-### Option 2: Install with pip
-
-```bash
-pip install virstrain==1.18
-chmod 755 bin/jellyfish-linux
-```
-
-### Option 3: Manual installation
-
-Make sure all dependencies are installed first.
-
-```bash
-git clone https://github.com/liaoherui/VirStrain.git
-cd VirStrain
-chmod 755 bin/jellyfish-linux
-rm VirStrain_DB.tar.gz
-```
-
----
-
-## Command mapping
-
-If you installed VirStrain via **Bioconda** or **pip**, use the following command names:
-
-| Source install command                  | Bioconda / pip command |
-| --------------------------------------- | ---------------------- |
-| `python VirStrain.py -h`                | `virstrain -h`         |
-| `python VirStrain_build.py -h`          | `virstrain_build -h`   |
-| `python VirStrain_contig.py -h`         | `virstrain_contig -h`  |
-| `python VirStrain_contigDB_merge.py -h` | `virstrain_merge -h`   |
-
----
-
-## Databases
-
-### Download the default reference database
-
-After cloning the repository:
-
-```bash
-cd VirStrain
-sh download.sh
-```
-
-### Alternative download method
-
-```bash
-cd VirStrain
-wget -qO- "https://figshare.com/ndownloader/files/34002479" | tar -zx
-```
-
-You may also download the database manually from [Google Drive](https://docs.google.com/uc?export=download&id=1XYqr64tJec7VeDBD0Xc9cuUZqmawoty6) or [Figshare](https://figshare.com/ndownloader/files/34002479) and extract it with:
-
-```bash
-tar -zxvf <downloaded_file>
-```
-
-If all download methods fail, please contact the author by email.
-
-### Additional downloadable databases
-
-#### DNA virus databases
-
-```bash
-sh download_dna.sh
-```
-
-Includes databases for:
-
-* **HBV**
-* **HCMV**
-
-#### Larger SARS-CoV-2 database
-
-```bash
-sh download_scov2_big.sh
-```
-
-#### Contig-level database
-
-```bash
-sh download_contig_db.sh
-```
-
----
-
-## Pre-built database downloads
-
-If the download scripts fail, pre-built databases are also available via Google Drive.
-
-| Name                         | Description                                                                     | Download                                                                                           |
-| ---------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `VirStrain_DB.tar.gz`        | Databases containing **SCOV2**, **H1N1**, and **HIV** strains used in the paper | [Google Drive](https://drive.google.com/file/d/1XYqr64tJec7VeDBD0Xc9cuUZqmawoty6/view?usp=sharing) |
-| `SCOV2_newBig.tar.gz`        | Expanded database containing additional **SCOV2** strains                       | [Google Drive](https://drive.google.com/file/d/1qAHjVADTiV3G00YekqystUXT2e7Ho2kq/view?usp=sharing) |
-| `VirStrain_DNA_DB.tar.gz`    | Databases containing **HBV** and **HCMV** strains                               | [Google Drive](https://drive.google.com/file/d/1INmaOpBKYFXj1gAngG6CikT7xVjmxsGZ/view?usp=sharing) |
-| `VirStrain_contig_DB.tar.gz` | Contig-level database                                                           | [Google Drive](https://drive.google.com/file/d/1oj-86Njz5mnY6djbhdv23a9r9OH5oqog/view?usp=sharing) |
-
----
+## Pre-built databases download
+In the event that the download scripts fail to retrieve the pre-built database, we also provide Google drive inks to access all pre-built databases. The table below offers information about the public pre-built databases. Users can download these databases and use them to identify viral strains directly.
+Name   |	Description   |	Download link
+------------ | ------------- | ------------- 
+VirStrain_DB.tar.gz |  Databases containing SCOV2, H1N1, and HIV viral strains used in the paper | [Google drive](https://drive.google.com/file/d/1XYqr64tJec7VeDBD0Xc9cuUZqmawoty6/view?usp=sharing)
+SCOV2_newBig.tar.gz |  Databases containing more SCOV2 viral strains used in the paper   | [Google drive](https://drive.google.com/file/d/1qAHjVADTiV3G00YekqystUXT2e7Ho2kq/view?usp=sharing)
+VirStrain_DNA_DB.tar.gz  | Databases containing two DNA viral (HBV and HCMV) strains used in the paper | [Google drive](https://drive.google.com/file/d/1INmaOpBKYFXj1gAngG6CikT7xVjmxsGZ/view?usp=sharing)
+VirStrain_contig_DB.tar.gz | Contig-level database | [Google drive](https://drive.google.com/file/d/1oj-86Njz5mnY6djbhdv23a9r9OH5oqog/view?usp=sharing)
 
 ## Usage
+It should be noted if you install VirStrain using bioconda/pip, you should replace the commands. (see below)
 
-> If you installed VirStrain via **Bioconda** or **pip**, replace script-based commands with the corresponding installed commands shown above.
+Command (Not bioconda/pip)    |	Command (bioconda/pip)
+------------ | ------------- 
+python VirStrain.py -h | virstrain -h
+python VirStrain_build.py -h | virstrain_build -h
+python VirStrain_contig.py -h | virstrain_contig -h
+python VirStrain_contigDB_merge.py -h | virstrain_merge -h
 
-### 1) Identify RNA virus strains from short reads
+### Use VirStrain to identify RNA virus strains in short reads.
 
-#### Single-end reads
+For SE reads:<BR/>
+  `python VirStrain.py -i Test_Data/MT451123_1.fq -d VirStrain_DB/SCOV2 -o MT451123_SE_Test`<BR/>
 
-```bash
-python VirStrain.py -i Test_Data/MT451123_1.fq -d VirStrain_DB/SCOV2 -o MT451123_SE_Test
+For PE reads:<BR/>
+  `python VirStrain.py -i Test_Data/MT451123_1.fq -p Test_Data/MT451123_2.fq -d VirStrain_DB/SCOV2 -o MT451123_PE_Test`<BR/>
+
+When the virus has high mutation rate, like HIV, you may need to add `-m` parameter.
+
+For HIV:<BR/>
+  SE reads: `python VirStrain.py -i <Read1> -d VirStrain_DB/HIV -o <Output_dir> -m`<BR/>
+  PE reads: `python VirStrain.py -i <Read1> -p <Read2> -d VirStrain_DB/HIV -o <Output_dir> -m`<BR/>
+
+### *__[Update - 2023 - Sep]__* Use VirStrain_contig to identify viral strains for assembled contigs.
+
+`python VirStrain_contig.py -i <Input_Contig_fasta> -d VirStrain_contig_DB -o VirStrain_Contig_Res`<BR/>
+
+You can use the command below to download the pre-built comprehensive viral strain database for contig identification:
+
+`sh download_contig_db.sh`
+
+If you want to convert pre-built VirStrain databases for reads (e.g. VirStrain_DB/SCOV2 and VirStrain_DB/H1N1) to database for contigs. Then you can try the command below:
+
+`python VirStrain_contigDB_merge.py -i VirStrain_DB/SCOV2,VirStrain_DB/H1N1 -o VirStrain_contig_DB_merge`
+
+
+### Use VirStrain to build your own custom database.<BR/>
+
+  `python VirStrain_build.py -i <Input_MSA> -d <Database_Dir>`<BR/>
+  
+   <b>Important note</b>: "," and "|" are not allowed in your <Input_MSA>. For example, ">Strain_A, 2022" or ">Strain_A|2022" is not allowed but ">Strain_A_2022" is allowed.
+  
+  For small-scale strains (<1000 input strains) or viruses with large genome sizes (like HCMV), you can use manual-covering function to cover more useful sites. For example, in our experiment, we used "-s 0.4" for 328 HCMV strains. Usually, 0.2~0.6 shoule be a suitable range for the parameter "-s". However, if you only have very few strains, like 3 strains, you can also use a greater value like "-s 0.8".
+  
+  `python VirStrain_build.py -i <Input_MSA> -d <Database_Dir> -s 0.4`<BR/>
+
+  
+  Besides, if you only want to use SNV sites from "x" to "y" (eg. x=500 to y=1000), then you can add the parameter `-r`.
+  
+  `python VirStrain_build.py -i <Input_MSA> -d <Database_Dir> -s 0.4 -r 500-1000`<BR/>
+  
+  Note: The format of input MSA should be same as the format of MSA generated by Mafft (https://mafft.cbrc.jp/alignment/software/).<BR/>
+  
+### Full command-line options
+<!---(Note: The initial idea of development of VirStrain is "Simpler is better". We do not want to burden users due to complicated usage of VirStrain. So the default parameters (some are inside the program) are simple but have good performance in our test, however, more useful parameters will be added for users who need them.)-->
+
+Identification - VirStrain.py (Default k-mer size: 25)
 ```
-
-#### Paired-end reads
-
-```bash
-python VirStrain.py -i Test_Data/MT451123_1.fq -p Test_Data/MT451123_2.fq -d VirStrain_DB/SCOV2 -o MT451123_PE_Test
-```
-
-#### High-mutation viruses such as HIV
-
-Use the `-m` option.
-
-Single-end:
-
-```bash
-python VirStrain.py -i <Read1> -d VirStrain_DB/HIV -o <Output_dir> -m
-```
-
-Paired-end:
-
-```bash
-python VirStrain.py -i <Read1> -p <Read2> -d VirStrain_DB/HIV -o <Output_dir> -m
-```
-
----
-
-### 2) Identify viral strains from assembled contigs
-
-```bash
-python VirStrain_contig.py -i <Input_Contig_fasta> -d VirStrain_contig_DB -o VirStrain_Contig_Res
-```
-
-#### Convert read-based databases into a contig database
-
-```bash
-python VirStrain_contigDB_merge.py -i VirStrain_DB/SCOV2,VirStrain_DB/H1N1 -o VirStrain_contig_DB_merge
-```
-
----
-
-### 3) Build a custom VirStrain database
-
-Basic usage:
-
-```bash
-python VirStrain_build.py -i <Input_MSA> -d <Database_Dir>
-```
-
-#### Important header naming rule
-
-Characters `,` and `|` are **not allowed** in sequence headers in `<Input_MSA>`.
-
-Examples:
-
-* Not allowed: `>Strain_A, 2022`
-* Not allowed: `>Strain_A|2022`
-* Allowed: `>Strain_A_2022`
-
-#### Manual covering for small datasets or large viral genomes
-
-For small strain collections (<1000 strains) or viruses with large genomes such as **HCMV**, you can use the manual covering function with `-s` to retain more useful sites.
-
-Example:
-
-```bash
-python VirStrain_build.py -i <Input_MSA> -d <Database_Dir> -s 0.4
-```
-
-General guidance:
-
-* `0.2–0.6` is usually a reasonable range for `-s`
-* With very few strains (for example, 3 strains), a larger value such as `-s 0.8` may also work
-
-#### Restrict SNV site range
-
-If you only want to use SNV sites from position `x` to `y`, use `-r`.
-
-Example:
-
-```bash
-python VirStrain_build.py -i <Input_MSA> -d <Database_Dir> -s 0.4 -r 500-1000
-```
-
-#### Input format note
-
-The input MSA must have the same format as an alignment generated by **MAFFT**:
-
-[https://mafft.cbrc.jp/alignment/software/](https://mafft.cbrc.jp/alignment/software/)
-
----
-
-## Full command-line options
-
-<details>
-<summary><strong>VirStrain.py — short-read strain identification</strong></summary>
-
-**Default k-mer size:** `25`
-
-```text
 VirStrain - An RNA virus strain-level identification tool for short reads.
 
-Example:
-python VirStrain.py -i Test_Data/MT451123_1.fq -p Test_Data/MT451123_2.fq -d VirStrain_DB/SCOV2 -o MT451123_PE_Test
+Example: python VirStrain.py -i Test_Data/MT451123_1.fq -p Test_Data/MT451123_2.fq -d VirStrain_DB/SCOV2 -o MT451123_PE_Test
 
 required arguments:
-    -i, --input_reads             Input FASTQ data
-    -d, --database_dir            Path to VirStrain database
+    -i, --input_reads             Input fastq data.
+    -d, --database_dir            Path of VirStrain database.
 
 optional arguments:
-    -h, --help                    Show help message and exit
-    -o, --output_dir              Output directory (default: ./VirStrain_Out)
-    -p, --input_reads2            Input FASTQ data for paired-end reads
-    -c, --site_filter_cutoff      Site filtering cutoff used when calculating Vscore (default: 0.05)
-    -s, --rank_by_sites           If set to 1, sort the most likely strain by site matches (default: 0)
-    -f, --turn_off_figures        If set to 1, do not generate figures (default: 0)
-    -m, --high_mutation_virus     Use for high mutation rate viruses such as HIV
+    -h, --help                    Show help message and exit.
+    -o, --output_dir              The output directory. (Default: ./VirStrain_Out)
+    -p, --input_reads2            Input fastq data for PE reads
+    -c, --site_filter_cutoff      The cutoff of filtering one site when calculate the Vscore. (Default: 0.05)
+    -s, --rank_by_sites		  If set to 1, then VirStrain will sort the most possible strain by matches to the sites. (default: 0)
+    -f, --turn_off_figures	  If set to 1, then VirStrain will not generate figures. (default: 0)
+    -m, --high_mutation_virus     If the virus has high mutation rate (like HIV), use this option. (Default: off)
 ```
-
-</details>
-
-<details>
-<summary><strong>VirStrain_build.py — custom database construction</strong></summary>
-
-**Default k-mer size:** `25`
-
-```text
+Build database - VirStrain_build.py (Default k-mer size: 25)
+```
 VirStrain - An RNA virus strain-level identification tool for short reads.
 
-Example:
-python VirStrain_build.py -i <Input_MSA> -d <Database_Dir>
+Example:  python VirStrain_build.py -i <Input_MSA> -d <Database_Dir>
 
 required arguments:
-    -i, --input_msa               Input MSA file (must match MAFFT output format)
-
+     -i, --input_msa               Input MSA file (Must have same format to msa generated by mafft).    
 optional arguments:
-    -d, --database_dir            Output directory for the constructed database (default: ./VirStrain_DB)
-    -c, --dash_cutoff             Dash cutoff for each MSA column (default: 0)
-    -s, --sites_cutoff            Cutoff for manual-covering function
-                                  (e.g. 1 = all useful sites; 0.8 = 80% of useful sites)
-    -r, --sites_rcutoff           Site range cutoff for covering algorithm
-                                  (e.g. 3-500 means only SNV sites from positions 3 to 500 are considered)
+     -d, --database_dir            The output directory of constructed database. (Default: ./VirStrain_DB)
+     -c, --dash_cutoff             The cutoff of dash in each column of MSA. (Default: 0)
+     -s, --sites_cutoff            The cutoff of sites number for manual-covering function. (eg. 1 means all useful sites will be use and 0.8 means 80% useful sites will be used)
+     -r, --sites_rcutoff           The cutoff of sites range for covering algorithm (eg. 3-500 means the covering algorithm will only consider the SNV sites from 3-500 of MSA.)          
+
 ```
 
-</details>
 
----
+## Output Format
 
-## Output format
+The output of VirStrain contains two files. The first is a report file in text format. This file contains all identified strains and their depth and site coverage, etc. The other file is an interactive HTML page to display the depth and uniqueness of sites. 
 
-VirStrain generates two primary outputs:
+You can check the output file in the folder "MT451123_Sim_PE" in this repository.
 
-1. A **text report**
-
-   * Contains identified strains, depth, site coverage, and related metrics
-
-2. An **interactive HTML report**
-
-   * Displays depth and site uniqueness information visually
-
-You can find an example output in the `MT451123_Sim_PE` folder in this repository.
-
-Example report image:
+The picture below displays an output example of a simulated data (Truth: MT451123.1). <BR/>
 
 ![VirStrain Report](https://github.com/liaoherui/VirStrain/blob/main/Output_fmt/report_simulate.png)
 
-### Report sections
+Explaination about the four headers in the output of VirStrain
+Header    |	Description	
+------------ | ------------- 
+**Most Possible strain*** | The most possible strain in the sequencing data detected by VirStrain.<BR/>(The strains with highest Vscore in the first iteraition.)
+**Other Possible strains*** | The other possible strain in the sequencing data detected by VirStrain.<BR/>(The strains with highest Vscore in the later iteraition, 10 mutation number can be a strong evidence for other possible strains according to our experiment result.)
+Highest Map Strains | The strain with maximum "Covered SNV site/Total SNV site" in the first iteration. For user's reference.
+Top 10 Score Strains | The top10 strain sorted by Vscore in the first iteration. <BR/>For user's reference, and also could be useful information to detect those low abundance strains which are highly similar to the high abundance strain (Eg, only one mutation number).
 
-| Header                      | Description                                                                                                                                                                                                  |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Most Possible strain***   | The most likely strain detected by VirStrain. These are the strains with the highest Vscore in the **first iteration**.                                                                                      |
-| **Other Possible strains*** | Additional possible strains detected by VirStrain. These are identified in **later iterations**. Based on the authors’ experiments, **10 mutations** can be strong evidence for additional possible strains. |
-| `Highest Map Strains`       | The strain with the maximum `Covered SNV site / Total SNV site` in the first iteration. Provided for reference.                                                                                              |
-| `Top 10 Score Strains`      | The top 10 strains ranked by Vscore in the first iteration. This can help identify low-abundance strains highly similar to high-abundance strains.                                                           |
+（Note: the header with **\*** means the content following this header includes the main identification result.）
 
-> Headers marked with `*` contain the main identification results.
+Explaination about the columns in the output of VirStrain:
 
-### Report columns
+Column_name    |	Description	
+------------ | ------------- 
+Strain_ID |	The NCBI (or other public database) accession number of identified strain.
+Cls_info | The cluster information of identified strain, eg: Cluster2830_2 -> belong Cluster2830, size=2.
+SubCls_info | The sub-cluster information of identified strain.
+Vscore | The Vscore generated by VirStrain algorithm.
+Total_Map_Rate | The covered sites out of total sites in the first iteration of VirStrain.
+Valid_Map_Rate | The covered sites out of total sites in the remaining iteration of VirStrain.
+Strain_depth | The sequencing depth of identified strain predicted by VirStrain.
+Strain_info | The metadata of identified strains, such as region information and subtype, etc.
+SNV_freq | The SNV frequency of all sites.
 
-| Column           | Description                                                                                                   |
-| ---------------- | ------------------------------------------------------------------------------------------------------------- |
-| `Strain_ID`      | NCBI accession number or other public database identifier for the identified strain                           |
-| `Cls_info`       | Cluster information for the identified strain, e.g. `Cluster2830_2` means cluster `Cluster2830` with size `2` |
-| `SubCls_info`    | Sub-cluster information                                                                                       |
-| `Vscore`         | Score generated by the VirStrain algorithm                                                                    |
-| `Total_Map_Rate` | Covered sites out of total sites in the first iteration                                                       |
-| `Valid_Map_Rate` | Covered sites out of total sites in the remaining iterations                                                  |
-| `Strain_depth`   | Predicted sequencing depth for the identified strain                                                          |
-| `Strain_info`    | Metadata for the identified strain, such as region and subtype                                                |
-| `SNV_freq`       | SNV frequency across all sites                                                                                |
 
----
+## References:
 
-## Citation
-
-If you use VirStrain, please cite:
-
-```text
-Liao, H., Cai, D. & Sun, Y. VirStrain: a strain identification tool for RNA viruses. Genome Biology 23, 38 (2022). https://doi.org/10.1186/s13059-022-02609-x
+how to cite this tool:
 ```
+Liao, H., Cai, D. & Sun, Y. VirStrain: a strain identification tool for RNA viruses. Genome Biol 23, 38 (2022). https://doi.org/10.1186/s13059-022-02609-x
+```
+
 
