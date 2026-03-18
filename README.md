@@ -127,12 +127,14 @@ Once Bioconda is configured:
 
 ```bash
 conda install -c bioconda virstrain
+chmod 755 bin/jellyfish-linux
 ```
 
 ### Option 2: Install with pip
 
 ```bash
 pip install virstrain==1.18
+chmod 755 bin/jellyfish-linux
 ```
 
 ### Option 3: Manual installation
