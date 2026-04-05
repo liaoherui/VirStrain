@@ -128,6 +128,7 @@ Once Bioconda is configured:
 
 ```bash
 conda install -c bioconda virstrain
+# or mamba install -c bioconda virstrain
 chmod 755 bin/jellyfish-linux
 ```
 
