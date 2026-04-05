@@ -28,7 +28,7 @@ VirStrain supports:
 <summary><strong>2026 updates</strong></summary>
 
 ### 2026-04-05
-- **v1.18**: VirStrain supports Python >=1.8 now!
+- **v1.18**: VirStrain supports Python >=3.8 now!
 
 </details>
 
