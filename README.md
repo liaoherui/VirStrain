@@ -135,8 +135,16 @@ sh install_package.sh
 Once Bioconda is configured:
 
 ```bash
-conda install -c bioconda virstrain
-# or mamba install -c bioconda virstrain
+# Create new conda environment and install VirStrain
+conda create -n virstrain_env -c conda-forge -c bioconda virstrain=1.18 -y
+# or mamba create -n virstrain_env -c conda-forge -c bioconda virstrain=1.18 -y
+
+# Activate the environment
+conda activate virstrain_env
+
+# Optional - or install VirStrain in your conda env
+#conda install -c bioconda virstrain or mamba install -c bioconda virstrain
+
 chmod 755 bin/jellyfish-linux
 ```
 
