@@ -142,10 +142,14 @@ conda create -n virstrain_env -c conda-forge -c bioconda virstrain=1.18 -y
 # Activate the environment
 conda activate virstrain_env
 
-# Optional - or install VirStrain in your conda env
-#conda install -c bioconda virstrain or mamba install -c bioconda virstrain
-
 chmod 755 bin/jellyfish-linux
+```
+
+Optional: or you can install VirStrain in your conda env (may get issues due to dependencies)
+
+```bash
+#conda install -c bioconda virstrain
+#or: mamba install -c bioconda virstrain
 ```
 
 ### Option 2: Install with pip
