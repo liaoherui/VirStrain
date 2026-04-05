@@ -94,16 +94,17 @@ VirStrain supports:
 
 ### Dependencies
 
-- **Python** >= 3.10  
+- **Python** >= 3.8
   - **Recommended:** 3.10.19  
   - **Should work on python >3.11 as well**
 - **Perl**
 - Python packages:
-  - `networkx==3.3`
-  - `numpy==1.26.4`
-  - `pandas==2.3.3`
-  - `biopython==1.84`
-  - `plotly==6.5.0`
+  - `biopython >=1.78`
+  - `matplotlib-base >=3.1`
+  - `networkx >=2.4`
+  - `numpy >=1.17`
+  - `pandas >=1.0`
+  - `plotly >=5.0`
 - **Bowtie2**  
   Required for VirStrain version **>= v1.18**
 
