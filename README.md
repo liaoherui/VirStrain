@@ -145,10 +145,10 @@ conda activate virstrain_env
 chmod 755 bin/jellyfish-linux
 ```
 
-Optional: or you can install VirStrain in your conda env (may get issues due to dependencies)
+Optional: you can also install VirStrain in your conda env directly (may get issues due to dependencies)
 
 ```bash
-#conda install -c bioconda virstrain
+conda install -c bioconda virstrain
 #or: mamba install -c bioconda virstrain
 ```
 
